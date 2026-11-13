@@ -2291,19 +2291,21 @@
         "additionalProperties": true,
         "properties": {
           "deletable": {
-            "description": "True when the account can self-serve delete this org (it is the only member and the org has no projects). When false, the org has other members or data and must be transferred/removed via support. The UI should offer a delete action only when this is true.",
+            "description": "True when the account can self-serve delete this resource. An org qualifies when the account is its only member and it has no projects. A plugin qualifies when it is unlisted and not already being deleted. The UI should offer a delete action for the blocker's kind only when this is true.",
             "type": "boolean"
           },
           "id": {
-            "description": "Resource ID (org ULID).",
+            "description": "Resource ID: an org ULID, or plugin_ followed by a ULID.",
             "type": "string"
           },
           "kind": {
-            "description": "Blocker kind. Currently always 'owned_org'.",
+            "description": "Blocker kind. Clients must tolerate kinds added later.",
             "enum": [
-              "owned_org"
+              "owned_org",
+              "owned_plugin"
             ],
-            "type": "string"
+            "type": "string",
+            "x-open-enum": true
           },
           "message": {
             "description": "Copy explaining how to clear the blocker.",
@@ -2670,7 +2672,7 @@
             "type": "boolean"
           },
           "blockers": {
-            "description": "Resources that must be resolved before deletion (owned orgs).",
+            "description": "Resources that must be resolved before deletion (owned orgs and plugins).",
             "items": {
               "$ref": "#/components/schemas/DeletionBlocker"
             },
@@ -5373,6 +5375,10 @@
             "description": "The only project that can install the plugin. Absent when any project can",
             "type": "string"
           },
+          "listed": {
+            "description": "True when the plugin shows in every project's catalog",
+            "type": "boolean"
+          },
           "logo_url": {
             "description": "Logo URL. A path without a host is on the web app's origin",
             "type": "string"
@@ -5407,7 +5413,8 @@
           "name",
           "logo_url",
           "install_levels",
-          "permissions"
+          "permissions",
+          "listed"
         ],
         "type": "object"
       },
@@ -18444,7 +18451,7 @@
         ]
       },
       "post": {
-        "description": "Requires project#manage on owner_project_id. Any other caller gets 404, as for a project that does not exist. owner_project_id must name a native Entire project; a mirrored project is refused with owner_project_not_native. The plugin starts unlisted. A project owns at most 100 plugins; more is refused with plugin_limit_reached. Entire sets listed and repo_create_daily_limit; the plugin's owner reads them. Core fetches a jwks_url once before saving it. logo_url must name an image the caller uploaded with an entire.com session to PUT /api/v1/plugin-images on the web app origin; a replace may also keep the plugin's current logo. A save that sets a new upload publishes it, and a replace deletes the uploaded logo it replaced. An expired upload is refused with logo_upload_expired. A create whose logo is refused still creates the plugin, without a published logo.",
+        "description": "Requires project#manage on owner_project_id. Any other caller gets 404, as for a project that does not exist. owner_project_id must name a native Entire project; a mirrored project is refused with owner_project_not_native. The plugin starts unlisted. A project owns at most 100 plugins; more is refused with plugin_limit_reached. A project whose owning account has requested deletion is refused with owner_deletion_pending. Entire sets listed and repo_create_daily_limit; the plugin's owner reads them. Core fetches a jwks_url once before saving it. logo_url must name an image the caller uploaded with an entire.com session to PUT /api/v1/plugin-images on the web app origin; a replace may also keep the plugin's current logo. A save that sets a new upload publishes it, and a replace deletes the uploaded logo it replaced. An expired upload is refused with logo_upload_expired. A create whose logo is refused still creates the plugin, without a published logo.",
         "operationId": "createPluginRegistration",
         "requestBody": {
           "content": {
@@ -19168,7 +19175,7 @@
             "sessionAuth": []
           }
         ],
-        "summary": "Get a plugin's catalog listing",
+        "summary": "Get a plugin's catalog entry",
         "tags": [
           "plugins"
         ]

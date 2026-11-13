@@ -32303,6 +32303,7 @@
     },
     "/repos/{repo_id}/trails": {
       "get": {
+        "deprecated": true,
         "description": "**Accepted credentials:** User token, Plugin installation token.\n\nThe repository's trails addressed by repo id, ordered by updated_at descending, then id descending. Cursors restore active filters and ordering without freezing a snapshot. Repeated filters must match the cursor. Callers without access receive 403; authorized callers receive 404 when trails are unavailable.\n\nUse an own-account bearer token (including supported service accounts) or a Core-issued plugin installation bearer token, subject to the permissions and restrictions below. Plugin assertion JWTs and plugin OAuth user-delegation tokens are not accepted here.\n\nRequires live repository pull permission (contents:read for plugin installations). Other authorized automation principals can also use this operation. Trails must be enabled. Send requests to the repository’s primary API region.",
         "operationId": "trailsListByRepoID",
         "parameters": [
@@ -32651,6 +32652,7 @@
         "x-entire-published": true
       },
       "post": {
+        "deprecated": true,
         "description": "**Accepted credentials:** User token, Plugin installation token.\n\nCreates a trail via the opaque repo id path; behaviour matches the wire-parity create (including the same status policy), and the Location header points back into this addressing scheme.\n\nUse an own-account bearer token (including supported service accounts) or a Core-issued plugin installation bearer token, subject to the permissions and restrictions below. Plugin assertion JWTs and plugin OAuth user-delegation tokens are not accepted here.\n\nRequires live repository push permission (contents:write for plugin installations). Accounts and automation principals may call it; a plugin installation's writes are credited to the installation, so refreshed tokens keep authorship. Trails must be enabled. Send requests to the repository’s primary API region.",
         "operationId": "trailsCreateByRepoID",
         "parameters": [
@@ -32818,6 +32820,7 @@
     },
     "/repos/{repo_id}/trails/gate-settings": {
       "get": {
+        "deprecated": true,
         "operationId": "trailsGateSettingsGetByRepoID",
         "parameters": [
           {
@@ -32930,6 +32933,7 @@
         ]
       },
       "patch": {
+        "deprecated": true,
         "operationId": "trailsGateSettingsPatchByRepoID",
         "parameters": [
           {
@@ -33075,6 +33079,7 @@
     },
     "/repos/{repo_id}/trails/gates": {
       "get": {
+        "deprecated": true,
         "description": "Returns the repository's gate configuration via the opaque repo id path, including disabled gates, editable configuration, and gatesEnabled. Same built-in initialization and availability while gate enforcement is disabled as the host-addressed route.",
         "operationId": "trailGateConfigByRepoID",
         "parameters": [
@@ -33188,6 +33193,7 @@
         ]
       },
       "post": {
+        "deprecated": true,
         "description": "Creates a gate definition via the opaque repo id path. Same near-universal 409 as the wire-parity route — see its description.",
         "operationId": "trailsGateDefinitionCreateByRepoID",
         "parameters": [
@@ -33346,6 +33352,7 @@
     },
     "/repos/{repo_id}/trails/gates/{gateId}": {
       "delete": {
+        "deprecated": true,
         "description": "Deletes a gate definition via the opaque repo id path. Same built-in delete-protection as the wire-parity route.",
         "operationId": "trailsGateDefinitionDeleteByRepoID",
         "parameters": [
@@ -33501,6 +33508,7 @@
         ]
       },
       "patch": {
+        "deprecated": true,
         "description": "Updates a gate definition via the opaque repo id path, with the same partial config-merge semantics as the wire-parity route.",
         "operationId": "trailsGateDefinitionPatchByRepoID",
         "parameters": [
@@ -33683,6 +33691,7 @@
     },
     "/repos/{repo_id}/trails/linked-branches": {
       "get": {
+        "deprecated": true,
         "description": "Every branch claimed by any trail in the repository, regardless of status, addressed by opaque repo id.",
         "operationId": "trailsLinkedBranchesByRepoID",
         "parameters": [
@@ -33799,6 +33808,7 @@
     },
     "/repos/{repo_id}/trails/stats": {
       "get": {
+        "deprecated": true,
         "description": "Trail counts bucketed by the four canonical statuses, addressed by opaque repo id. The total also counts legacy statuses that fit no bucket.",
         "operationId": "trailsStatsByRepoID",
         "parameters": [
@@ -34101,6 +34111,7 @@
         ]
       },
       "get": {
+        "deprecated": true,
         "description": "**Accepted credentials:** User token, Plugin installation token.\n\nA single trail by number, addressed by opaque repo id. Same fields and composition boundary as the wire-parity path.\n\nUse an own-account bearer token (including supported service accounts) or a Core-issued plugin installation bearer token, subject to the permissions and restrictions below. Plugin assertion JWTs and plugin OAuth user-delegation tokens are not accepted here.\n\nRequires live repository pull permission (contents:read for plugin installations). Other authorized automation principals can also use this operation. Trails must be enabled. Send requests to the repository’s primary API region.",
         "operationId": "trailDetailByRepoID",
         "parameters": [
@@ -34258,6 +34269,7 @@
         "x-entire-published": true
       },
       "patch": {
+        "deprecated": true,
         "description": "**Accepted credentials:** User token, Plugin installation token.\n\nUpdates trail metadata via the opaque repo id path, with the same status policy and optional If-Match conditional behaviour.\n\nUse an own-account bearer token (including supported service accounts) or a Core-issued plugin installation bearer token, subject to the permissions and restrictions below. Plugin assertion JWTs and plugin OAuth user-delegation tokens are not accepted here.\n\nRequires live repository push permission (contents:write for plugin installations). Accounts and automation principals may call it; a plugin installation's writes are credited to the installation, so refreshed tokens keep authorship. Trails must be enabled. Send requests to the repository’s primary API region.",
         "operationId": "trailsUpdateByRepoID",
         "parameters": [
@@ -34449,6 +34461,7 @@
     },
     "/repos/{repo_id}/trails/{number}/approvals": {
       "get": {
+        "deprecated": true,
         "description": "**Accepted credentials:** User token, Plugin installation token.\n\n\n\nUse an own-account bearer token (including supported service accounts) or a Core-issued plugin installation bearer token, subject to the permissions and restrictions below. Plugin assertion JWTs and plugin OAuth user-delegation tokens are not accepted here.\n\nRequires live repository pull permission (contents:read for plugin installations). Other authorized automation principals can also use this operation. Trails must be enabled. Send requests to the repository’s primary API region.",
         "operationId": "trailsApprovalsByRepoID",
         "parameters": [
@@ -34591,6 +34604,7 @@
         "x-entire-published": true
       },
       "post": {
+        "deprecated": true,
         "description": "**Accepted credentials:** User token.\n\n\n\nUse an own-account bearer token (including supported service accounts). Plugin installation tokens are not accepted for this action. Plugin assertion JWTs and plugin OAuth user-delegation tokens are not accepted here.\n\nRequires live repository push permission and an account subject; automation principals are rejected. Trails must be enabled. Send requests to the repository’s primary API region.",
         "operationId": "trailsApprovalsSubmitByRepoID",
         "parameters": [
@@ -34754,6 +34768,7 @@
     },
     "/repos/{repo_id}/trails/{number}/attachments": {
       "get": {
+        "deprecated": true,
         "operationId": "trailsAttachmentsListByRepoID",
         "parameters": [
           {
@@ -34889,6 +34904,7 @@
     },
     "/repos/{repo_id}/trails/{number}/attachments/{attachmentId}": {
       "get": {
+        "deprecated": true,
         "description": "Redirects to a presigned download URL via the opaque repo id path, with the same readiness behaviour.",
         "operationId": "trailsAttachmentServeByRepoID",
         "parameters": [
@@ -35050,6 +35066,7 @@
     },
     "/repos/{repo_id}/trails/{number}/branch": {
       "delete": {
+        "deprecated": true,
         "description": "Answers 204 once the branch is gone, including a branch that was already gone. Open and draft Trails based on the branch are first moved to the base the Trail was merged into, as the caller. A kept branch answers 409 with `code` set to why: moved, protected, default_branch, stacked (a Trail based on it could not be moved) or base; a branch name another Trail has taken answers 409 with `code` branch_claimed, and a merge still finishing 409 with merge_in_progress. A refusal answers 422 or 503 with `code` set to its reason. A branch state that could not be read, a move of a Trail based on it that failed, and any other storage failure carry `code` failed.",
         "operationId": "trailsDeleteBranchByRepoID",
         "parameters": [
@@ -35199,6 +35216,7 @@
     },
     "/repos/{repo_id}/trails/{number}/ci-pr": {
       "post": {
+        "deprecated": true,
         "description": "Ensures a Trail has a CI pull request via the opaque repo id path; behaviour, claim protection, 201 response, and Location match the host-addressed route.",
         "operationId": "trailsCreateCIPrByRepoID",
         "parameters": [
@@ -35362,6 +35380,7 @@
     },
     "/repos/{repo_id}/trails/{number}/discussions": {
       "get": {
+        "deprecated": true,
         "description": "**Accepted credentials:** User token, Plugin installation token.\n\n\n\nUse an own-account bearer token (including supported service accounts) or a Core-issued plugin installation bearer token, subject to the permissions and restrictions below. Plugin assertion JWTs and plugin OAuth user-delegation tokens are not accepted here.\n\nRequires live repository pull permission (contents:read for plugin installations). Other authorized automation principals can also use this operation. Trails must be enabled. Send requests to the repository’s primary API region.",
         "operationId": "trailDiscussionsListByRepoID",
         "parameters": [
@@ -35538,6 +35557,7 @@
         "x-entire-published": true
       },
       "post": {
+        "deprecated": true,
         "description": "**Accepted credentials:** User token, Plugin installation token.\n\n\n\nUse an own-account bearer token (including supported service accounts) or a Core-issued plugin installation bearer token, subject to the permissions and restrictions below. Plugin assertion JWTs and plugin OAuth user-delegation tokens are not accepted here.\n\nRequires live repository push OR write_discussions permission (discussions:write for plugin installations). Trails must be enabled. Send requests to the repository’s primary API region. Repository discussion authors may be accounts or automations; plugin authors are identified by installation so refreshed tokens retain authorship. Project discussions are account-only.",
         "operationId": "trailDiscussionsCreateByRepoID",
         "parameters": [
@@ -35706,6 +35726,7 @@
     },
     "/repos/{repo_id}/trails/{number}/discussions/stream": {
       "get": {
+        "deprecated": true,
         "operationId": "trailDiscussionEventsStreamByRepoID",
         "parameters": [
           {
@@ -35880,6 +35901,7 @@
     },
     "/repos/{repo_id}/trails/{number}/discussions/{discussion_id}": {
       "get": {
+        "deprecated": true,
         "description": "**Accepted credentials:** User token, Plugin installation token.\n\n\n\nUse an own-account bearer token (including supported service accounts) or a Core-issued plugin installation bearer token, subject to the permissions and restrictions below. Plugin assertion JWTs and plugin OAuth user-delegation tokens are not accepted here.\n\nRequires live repository pull permission (contents:read for plugin installations). Other authorized automation principals can also use this operation. Trails must be enabled. Send requests to the repository’s primary API region.",
         "operationId": "trailDiscussionDetailByRepoID",
         "parameters": [
@@ -36026,6 +36048,7 @@
         "x-entire-published": true
       },
       "patch": {
+        "deprecated": true,
         "description": "**Accepted credentials:** User token, Plugin installation token.\n\n\n\nUse an own-account bearer token (including supported service accounts) or a Core-issued plugin installation bearer token, subject to the permissions and restrictions below. Plugin assertion JWTs and plugin OAuth user-delegation tokens are not accepted here.\n\nRequires live repository push permission (contents:write for plugin installations); discussions:write alone is insufficient. Account subjects may retitle or resolve ordinary discussions. Automations may change resolution only for a discussion linked to a code-review comment; ordinary discussion mutations reject automations and code-review titles are read-only. Trails must be enabled. Send requests to the repository’s primary API region.",
         "operationId": "trailDiscussionUpdateByRepoID",
         "parameters": [
@@ -36205,6 +36228,7 @@
     },
     "/repos/{repo_id}/trails/{number}/discussions/{discussion_id}/messages": {
       "post": {
+        "deprecated": true,
         "description": "**Accepted credentials:** User token, Plugin installation token.\n\n\n\nUse an own-account bearer token (including supported service accounts) or a Core-issued plugin installation bearer token, subject to the permissions and restrictions below. Plugin assertion JWTs and plugin OAuth user-delegation tokens are not accepted here.\n\nRequires live repository push OR write_discussions permission (discussions:write for plugin installations). Trails must be enabled. Send requests to the repository’s primary API region. Repository discussion authors may be accounts or automations; plugin authors are identified by installation so refreshed tokens retain authorship. Project discussions are account-only.",
         "operationId": "trailDiscussionMessageCreateByRepoID",
         "parameters": [
@@ -36381,6 +36405,7 @@
     },
     "/repos/{repo_id}/trails/{number}/discussions/{discussion_id}/messages/{message_id}": {
       "delete": {
+        "deprecated": true,
         "description": "**Accepted credentials:** User token, Plugin installation token.\n\n\n\nUse an own-account bearer token (including supported service accounts) or a Core-issued plugin installation bearer token, subject to the permissions and restrictions below. Plugin assertion JWTs and plugin OAuth user-delegation tokens are not accepted here.\n\nRequires live repository push OR write_discussions permission (discussions:write for plugin installations). Trails must be enabled. Send requests to the repository’s primary API region. Repository discussion authors may be accounts or automations; plugin authors are identified by installation so refreshed tokens retain authorship. Project discussions are account-only. Only the author may edit or delete a message; another installation cannot edit it.",
         "operationId": "trailDiscussionMessageDeleteByRepoID",
         "parameters": [
@@ -36548,6 +36573,7 @@
         "x-entire-published": true
       },
       "patch": {
+        "deprecated": true,
         "description": "**Accepted credentials:** User token, Plugin installation token.\n\n\n\nUse an own-account bearer token (including supported service accounts) or a Core-issued plugin installation bearer token, subject to the permissions and restrictions below. Plugin assertion JWTs and plugin OAuth user-delegation tokens are not accepted here.\n\nRequires live repository push OR write_discussions permission (discussions:write for plugin installations). Trails must be enabled. Send requests to the repository’s primary API region. Repository discussion authors may be accounts or automations; plugin authors are identified by installation so refreshed tokens retain authorship. Project discussions are account-only. Only the author may edit or delete a message; another installation cannot edit it.",
         "operationId": "trailDiscussionMessageUpdateByRepoID",
         "parameters": [
@@ -36735,6 +36761,7 @@
     },
     "/repos/{repo_id}/trails/{number}/events": {
       "get": {
+        "deprecated": true,
         "description": "**Accepted credentials:** User token, Plugin installation token.\n\nReturns trail events by opaque repo id with the same JSON cursor pagination, category filters, open event catalog, Last-Event-ID SSE resume, and from=head latest-push start as the name-addressed route.\n\nUse an own-account bearer token (including supported service accounts) or a Core-issued plugin installation bearer token, subject to the permissions and restrictions below. Plugin assertion JWTs and plugin OAuth user-delegation tokens are not accepted here.\n\nRequires live repository pull permission (contents:read for plugin installations). Other authorized automation principals can also use this operation. Trails must be enabled. Send requests to the repository’s primary API region. Streams recheck credentials, repository access and placement.",
         "operationId": "trailEventsByRepoID",
         "parameters": [
@@ -36990,6 +37017,7 @@
     },
     "/repos/{repo_id}/trails/{number}/gates": {
       "get": {
+        "deprecated": true,
         "description": "**Accepted credentials:** User token, Plugin installation token.\n\nEvaluates configured gates using persisted checks results. mergeable indicates whether these gates allow merging; it does not include merge conflicts or guarantee fresh CI evidence. Use /mergeability for current merge readiness.\n\nUse an own-account bearer token (including supported service accounts) or a Core-issued plugin installation bearer token, subject to the permissions and restrictions below. Plugin assertion JWTs and plugin OAuth user-delegation tokens are not accepted here.\n\nRequires live repository pull permission (contents:read for plugin installations). Other authorized automation principals can also use this operation. Trails must be enabled. Send requests to the repository’s primary API region.",
         "operationId": "trailsGatesByRepoID",
         "parameters": [
@@ -37135,6 +37163,7 @@
     },
     "/repos/{repo_id}/trails/{number}/gates/recompute": {
       "post": {
+        "deprecated": true,
         "description": "Forces a single trail's builtin gate results (up_to_date and approvals) to be recomputed against entiredb's current mirror compare and locally-stored review data, right now, with no forge call at all. The trail must be open with a linked branch and a known head, or this returns 422. checks is deliberately excluded — it stays covered by its own dedicated trigger, the check-run-completed webhook — so this route never touches base, ahead-by/has_code_changes, review-comment staleness, findings, or the checks gate; its only effect is the up_to_date/approvals recompute itself, returned as the resulting gate state.",
         "operationId": "trailsGateRecomputeByRepoID",
         "parameters": [
@@ -37281,6 +37310,7 @@
     },
     "/repos/{repo_id}/trails/{number}/merge": {
       "post": {
+        "deprecated": true,
         "description": "**Accepted credentials:** User token, Plugin installation token.\n\n\n\nUse an own-account bearer token (including supported service accounts) or a Core-issued plugin installation bearer token, subject to the permissions and restrictions below. Plugin assertion JWTs and plugin OAuth user-delegation tokens are not accepted here.\n\nRequires live repository push permission (contents:write for plugin installations). Accounts and automation principals may call it; a plugin installation's writes are credited to the installation, so refreshed tokens keep authorship. Trails must be enabled. Send requests to the repository’s primary API region. Merge additionally enforces current merge policy, gates and any bypass authorization.",
         "operationId": "trailsMergeSubmitByRepoID",
         "parameters": [
@@ -37465,6 +37495,7 @@
     },
     "/repos/{repo_id}/trails/{number}/mergeability": {
       "get": {
+        "deprecated": true,
         "description": "**Accepted credentials:** User token, Plugin installation token.\n\n\n\nUse an own-account bearer token (including supported service accounts) or a Core-issued plugin installation bearer token, subject to the permissions and restrictions below. Plugin assertion JWTs and plugin OAuth user-delegation tokens are not accepted here.\n\nRequires live repository pull permission (contents:read for plugin installations). Other authorized automation principals can also use this operation. Trails must be enabled. Send requests to the repository’s primary API region.",
         "operationId": "trailsMergeabilityByRepoID",
         "parameters": [
@@ -37600,6 +37631,7 @@
     },
     "/repos/{repo_id}/trails/{number}/monitors": {
       "get": {
+        "deprecated": true,
         "operationId": "trailMonitorsByRepoID",
         "parameters": [
           {
@@ -37735,6 +37767,7 @@
     },
     "/repos/{repo_id}/trails/{number}/restore-branch": {
       "post": {
+        "deprecated": true,
         "operationId": "trailsRestoreBranchByRepoID",
         "parameters": [
           {
@@ -37890,6 +37923,7 @@
     },
     "/repos/{repo_id}/trails/{number}/review-rerun": {
       "post": {
+        "deprecated": true,
         "description": "Re-runs every configured native review runner against the trail's current head and also fires the trail's saved agent reviewers the way a push would, so a stuck agent reviewer recovers alongside any runner reruns. Already active same-head runs and completed reviews are preserved rather than duplicated; only newly accepted runner runs count in the response's Launched. If any runner's run is recorded failed at launch because its prompt is over the 64 KiB launch limit, the response is 422 with the message that run records, even when other runners launched. A launch refused for billing answers 422 with a message saying what to do next, and records no run. A repo whose only reviewers are saved agents answers 202 with Launched: 0; a repo with no reviewer of either kind answers 422.",
         "operationId": "reviewRerun",
         "parameters": [
@@ -38036,6 +38070,7 @@
     },
     "/repos/{repo_id}/trails/{number}/reviews": {
       "post": {
+        "deprecated": true,
         "description": "**Accepted credentials:** User token, Plugin installation token.\n\n\n\nUse an own-account bearer token (including supported service accounts) or a Core-issued plugin installation bearer token, subject to the permissions and restrictions below. Plugin assertion JWTs and plugin OAuth user-delegation tokens are not accepted here.\n\nRequires live repository push or write_findings permission (contents:write or findings:write for plugin installations). Separate service exception: platform publish_review also admits a caller without push; actor_id overrides require that platform grant and are forbidden for automations. Trails must be enabled. Send requests to the repository’s primary API region.",
         "operationId": "reviewStartByRepoID",
         "parameters": [
@@ -38221,6 +38256,7 @@
     },
     "/repos/{repo_id}/trails/{number}/reviews/comments": {
       "get": {
+        "deprecated": true,
         "description": "**Accepted credentials:** User token, Plugin installation token.\n\n\n\nUse an own-account bearer token (including supported service accounts) or a Core-issued plugin installation bearer token, subject to the permissions and restrictions below. Plugin assertion JWTs and plugin OAuth user-delegation tokens are not accepted here.\n\nRequires live repository pull or read_findings permission (contents:read or findings:read for plugin installations). Findings can include code excerpts: location selected_text and nearby_text, and suggested changes. Other authorized automation principals can also use this operation. Trails must be enabled. Send requests to the repository’s primary API region.",
         "operationId": "trailReviewCommentsListByRepoID",
         "parameters": [
@@ -38498,6 +38534,7 @@
     },
     "/repos/{repo_id}/trails/{number}/reviews/{review_id}": {
       "get": {
+        "deprecated": true,
         "description": "**Accepted credentials:** User token, Plugin installation token.\n\nA review's current state, addressed by opaque repo id. Same projection, counts, keyset paging, and event cursor as the wire-parity path.\n\nUse an own-account bearer token (including supported service accounts) or a Core-issued plugin installation bearer token, subject to the permissions and restrictions below. Plugin assertion JWTs and plugin OAuth user-delegation tokens are not accepted here.\n\nRequires live repository pull or read_findings permission (contents:read or findings:read for plugin installations). Findings can include code excerpts: location selected_text and nearby_text, and suggested changes. Other authorized automation principals can also use this operation. Trails must be enabled. Send requests to the repository’s primary API region.",
         "operationId": "reviewSnapshotByRepoID",
         "parameters": [
@@ -38687,6 +38724,7 @@
     },
     "/repos/{repo_id}/trails/{number}/reviews/{review_id}/comments": {
       "get": {
+        "deprecated": true,
         "description": "A review's comments, addressed by opaque repo id, with the same filters and event cursor as the wire-parity path.",
         "operationId": "reviewCommentsListByRepoID",
         "parameters": [
@@ -38960,6 +38998,7 @@
         ]
       },
       "post": {
+        "deprecated": true,
         "description": "**Accepted credentials:** User token, Plugin installation token.\n\n\n\nUse an own-account bearer token (including supported service accounts) or a Core-issued plugin installation bearer token, subject to the permissions and restrictions below. Plugin assertion JWTs and plugin OAuth user-delegation tokens are not accepted here.\n\nRequires live repository push or write_findings permission (contents:write or findings:write for plugin installations), or the separate platform publish_review service grant. Comments must belong to the review author; a plugin installation authors its reviews, so a refreshed token of the same installation keeps authorship. Trails must be enabled. Send requests to the repository’s primary API region.",
         "operationId": "reviewCommentsByRepoID",
         "parameters": [
@@ -39145,6 +39184,7 @@
     },
     "/repos/{repo_id}/trails/{number}/reviews/{review_id}/comments/{comment_id}": {
       "get": {
+        "deprecated": true,
         "operationId": "reviewCommentGetByRepoID",
         "parameters": [
           {
@@ -39289,6 +39329,7 @@
         ]
       },
       "patch": {
+        "deprecated": true,
         "description": "**Accepted credentials:** User token, Plugin installation token.\n\n\n\nUse an own-account bearer token (including supported service accounts) or a Core-issued plugin installation bearer token, subject to the permissions and restrictions below. Plugin assertion JWTs and plugin OAuth user-delegation tokens are not accepted here.\n\nRequires live repository push or write_findings permission (contents:write or findings:write for plugin installations); platform publish_review alone does not authorize PATCH. A caller without push may update only comments on reviews it authored. Comment-field and status-transition rules still apply. Trails must be enabled. Send requests to the repository’s primary API region.",
         "operationId": "reviewCommentPatchByRepoID",
         "parameters": [
@@ -39466,6 +39507,7 @@
     },
     "/repos/{repo_id}/trails/{number}/reviews/{review_id}/diff": {
       "get": {
+        "deprecated": true,
         "description": "The per-file diff of the code a review pins, resolved through the git source. The base is the code_version's stored merge base, or derived from its base ref when absent; a review whose head or base can't be resolved is a 409. Patches are attached best-effort and dropped (with the file flagged) when the whole diff exceeds the read cap.",
         "operationId": "reviewDiffByRepoID",
         "parameters": [
@@ -39633,6 +39675,7 @@
     },
     "/repos/{repo_id}/trails/{number}/reviews/{review_id}/files": {
       "get": {
+        "deprecated": true,
         "description": "File contents at the reviewed code_version's head SHA. A path that is missing, too large, or unreadable comes back as a null entry rather than failing the request; the batch is bounded by an aggregate byte budget.",
         "operationId": "reviewFilesByRepoID",
         "parameters": [
@@ -39810,6 +39853,7 @@
     },
     "/repos/{repo_id}/trails/{number}/runs/{runnerId}": {
       "get": {
+        "deprecated": true,
         "operationId": "trailRunByRepoID",
         "parameters": [
           {
@@ -39952,6 +39996,7 @@
         ]
       },
       "post": {
+        "deprecated": true,
         "description": "Starts the requested configured trail runner against the trail's current head. Repeating a request while that runner is active returns the existing run with outcome already_in_progress; outcome already_complete means a completed review already covers this head and nothing new launched. A run recorded failed at launch because its prompt is over the 64 KiB launch limit answers 422 with the message the run records. A launch refused for billing (the free trial is used up, a monthly spend limit was reached, or billing is suspended) also answers 422, with a message saying what to do next and a code naming the reason, and records no run. A runner that only declares the push trigger (not api) is refused with 409 unless its own latest run for this trail already failed, timed out, or was canceled — this route only ever retries a real prior failure for that runner, it never grants it unconditional manual launching — and that retry is scoped to native review runners (trails_review-enabled); a merged/closed trail or one with no valid head is refused with 422, matching review-rerun's own admission.",
         "operationId": "manualTrailRunnerLaunch",
         "parameters": [
@@ -40108,6 +40153,7 @@
     },
     "/repos/{repo_id}/trails/{number}/stack": {
       "get": {
+        "deprecated": true,
         "operationId": "trailsStackByRepoID",
         "parameters": [
           {
@@ -40233,6 +40279,7 @@
     },
     "/repos/{repo_id}/trails/{number}/timeline": {
       "get": {
+        "deprecated": true,
         "description": "The trail's merged event timeline, newest first, cursor-paginated. Lifecycle, message, review, and commit events are merged into one ordered stream; commits are read through from git. commitCount is omitted and incomplete is true when the commit read-through degraded.",
         "operationId": "trailsTimelineByRepoID",
         "parameters": [
@@ -40383,6 +40430,7 @@
     },
     "/repos/{repo_id}/trails/{number}/update-branch": {
       "post": {
+        "deprecated": true,
         "description": "Updates an open Entire-native Trail branch by merging its base branch into it through the repository's native git storage. Both branch tips are fenced at their resolved SHAs, so a concurrent push is rejected rather than silently included; content conflicts leave the branch unchanged and must be resolved manually.",
         "operationId": "trailsUpdateBranchByRepoID",
         "parameters": [
@@ -40539,6 +40587,7 @@
     },
     "/repos/{repo_id}/trails/{number}/watchers": {
       "get": {
+        "deprecated": true,
         "operationId": "trailWatchersByRepoID",
         "parameters": [
           {
@@ -57824,6 +57873,57 @@
         "x-entire-published": true
       }
     },
+    "trail.gates.updated": {
+      "post": {
+        "description": "A gate's status changed on a trail's head commit. Sent only when the status changes. previous_status is null when there is no earlier result to compare. gates gives the overall state: every enabled gate on the trail at head_sha. version orders a trail's gate events, which can arrive out of order.",
+        "operationId": "pluginWebhookTrailGatesUpdated",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "User-Agent",
+            "required": true,
+            "schema": {
+              "enum": [
+                "Entire-Webhooks/1"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PluginWebhookTrailGatesDelivery"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "429": {
+            "description": "Retried up to 7 times over about 15 minutes with the same delivery_id, as are network errors and timeouts. Retry-After in seconds can lengthen a wait up to 5 minutes; an HTTP-date Retry-After is ignored."
+          },
+          "default": {
+            "description": "Any other status, including a redirect, fails the delivery without a retry. Redirects are not followed."
+          },
+          "2XX": {
+            "description": "Delivered. Answer within 10 seconds and do the work afterwards."
+          },
+          "5XX": {
+            "description": "Retried up to 7 times over about 15 minutes with the same delivery_id, as are network errors and timeouts. Retry-After in seconds can lengthen a wait up to 5 minutes; an HTTP-date Retry-After is ignored."
+          }
+        },
+        "security": [
+          {
+            "pluginWebhookToken": []
+          }
+        ],
+        "summary": "Trail gates updated",
+        "x-entire-experimental": true,
+        "x-entire-published": true
+      }
+    },
     "trail.merged": {
       "post": {
         "description": "A trail was merged into its base.",
@@ -62994,6 +63094,172 @@
         ],
         "type": "object"
       },
+      "PluginWebhookTrailGate": {
+        "additionalProperties": true,
+        "properties": {
+          "blocking": {
+            "description": "Whether the gate blocks the trail from merging.",
+            "type": "boolean"
+          },
+          "key": {
+            "description": "Tells apart two gates of the same type, such as two plugin gates.",
+            "type": "string"
+          },
+          "previous_status": {
+            "description": "The status before this change. Null when there is no earlier result to compare.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "status": {
+            "description": "pending, passed, failed, error or skipped.",
+            "type": "string"
+          },
+          "type": {
+            "description": "The gate's kind, such as checks or plugin.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "key",
+          "status",
+          "previous_status",
+          "blocking"
+        ],
+        "type": "object"
+      },
+      "PluginWebhookTrailGateSummary": {
+        "additionalProperties": true,
+        "properties": {
+          "blocking": {
+            "description": "Whether the gate blocks the trail from merging.",
+            "type": "boolean"
+          },
+          "key": {
+            "description": "Tells apart two gates of the same type, such as two plugin gates.",
+            "type": "string"
+          },
+          "status": {
+            "description": "pending, passed, failed, error or skipped.",
+            "type": "string"
+          },
+          "type": {
+            "description": "The gate's kind, such as checks or plugin.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "key",
+          "status",
+          "blocking"
+        ],
+        "type": "object"
+      },
+      "PluginWebhookTrailGatesDelivery": {
+        "additionalProperties": true,
+        "properties": {
+          "api_url": {
+            "description": "The delivering cell's Entire API, where this repository's check runs go.",
+            "type": "string"
+          },
+          "core_url": {
+            "description": "The delivering cell's Entire core.",
+            "type": "string"
+          },
+          "delivery_id": {
+            "description": "Unique to this delivery and the same across retries. Deduplicate on it.",
+            "type": "string"
+          },
+          "event": {
+            "$ref": "#/components/schemas/PluginWebhookTrailGatesEventBody"
+          },
+          "installation_id": {
+            "type": "string"
+          },
+          "plugin_id": {
+            "description": "Your plugin slug.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "delivery_id",
+          "plugin_id",
+          "installation_id",
+          "core_url",
+          "api_url",
+          "event"
+        ],
+        "type": "object"
+      },
+      "PluginWebhookTrailGatesEventBody": {
+        "additionalProperties": true,
+        "properties": {
+          "id": {
+            "description": "The same for every installation that receives this event.",
+            "type": "string"
+          },
+          "payload": {
+            "$ref": "#/components/schemas/PluginWebhookTrailGatesPayload"
+          },
+          "time": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "type",
+          "time",
+          "payload"
+        ],
+        "type": "object"
+      },
+      "PluginWebhookTrailGatesPayload": {
+        "additionalProperties": true,
+        "properties": {
+          "gate": {
+            "$ref": "#/components/schemas/PluginWebhookTrailGate"
+          },
+          "gates": {
+            "description": "Every enabled gate on the trail at head_sha as of this event. pending means no result yet.",
+            "items": {
+              "$ref": "#/components/schemas/PluginWebhookTrailGateSummary"
+            },
+            "type": "array"
+          },
+          "head_sha": {
+            "description": "The commit the gate result is for. It can lag the trail's current head while a result for an earlier push lands.",
+            "type": "string"
+          },
+          "repository": {
+            "$ref": "#/components/schemas/PluginWebhookTrailRepository"
+          },
+          "trail": {
+            "$ref": "#/components/schemas/PluginWebhookTrailRef"
+          },
+          "version": {
+            "description": "Orders this trail's gate events. Higher is newer; deliveries can arrive out of order, so ignore one lower than the highest you have handled for this trail.",
+            "format": "int64",
+            "minimum": 1,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "repository",
+          "trail",
+          "head_sha",
+          "version",
+          "gate",
+          "gates"
+        ],
+        "type": "object"
+      },
       "PluginWebhookTrailPayload": {
         "additionalProperties": true,
         "properties": {
@@ -63028,6 +63294,25 @@
           "repository",
           "trail",
           "actor"
+        ],
+        "type": "object"
+      },
+      "PluginWebhookTrailRef": {
+        "additionalProperties": true,
+        "properties": {
+          "id": {
+            "description": "The trail's id. It does not change.",
+            "type": "string"
+          },
+          "number": {
+            "description": "The trail's number in its repository.",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "number"
         ],
         "type": "object"
       },
@@ -64385,7 +64670,7 @@
           "usd_per_million_tokens": {
             "allOf": [
               {
-                "description": "Each price is a decimal string. Null when the rate card is missing any of the four prices for the model."
+                "description": "Each price is a decimal string. Null unless the rate card has exactly one input price and one output price for the model and no conflicting prices for any token type."
               },
               {
                 "$ref": "#/components/schemas/AgentTokenPrices"
@@ -64788,10 +65073,18 @@
         "additionalProperties": false,
         "properties": {
           "cache_read": {
-            "type": "string"
+            "description": "Null when no cache read price was read from the rate card.",
+            "type": [
+              "string",
+              "null"
+            ]
           },
           "cache_write": {
-            "type": "string"
+            "description": "Null when no cache write price was read from the rate card.",
+            "type": [
+              "string",
+              "null"
+            ]
           },
           "input": {
             "type": "string"
@@ -65831,6 +66124,10 @@
           "base": {
             "type": "string"
           },
+          "base_missing": {
+            "description": "True when the base branch doesn't exist in the repository, so the Change can't be compared, gated or reviewed until someone pushes the base or changes the Change's base. False on a merged or closed Change.",
+            "type": "boolean"
+          },
           "base_sha": {
             "type": [
               "string",
@@ -66038,7 +66335,8 @@
           "last_activity_at",
           "branch_state",
           "code_changes",
-          "lifecycle_sync"
+          "lifecycle_sync",
+          "base_missing"
         ],
         "type": "object"
       },
@@ -83154,6 +83452,10 @@
           "base": {
             "type": "string"
           },
+          "base_missing": {
+            "description": "True when the base branch doesn't exist in the repository, so the Change can't be compared, gated or reviewed until someone pushes the base or changes the Change's base. False on a merged or closed Change.",
+            "type": "boolean"
+          },
           "base_sha": {
             "type": [
               "string",
@@ -83348,7 +83650,8 @@
           "last_activity_at",
           "branch_state",
           "code_changes",
-          "lifecycle_sync"
+          "lifecycle_sync",
+          "base_missing"
         ],
         "type": "object"
       },
