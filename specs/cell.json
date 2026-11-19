@@ -7748,6 +7748,546 @@
       },
       "x-upstream": "brainstore"
     },
+    "/repos/{repo_id}/brain/reconcile/runs": {
+      "post": {
+        "operationId": "openReconcileRun",
+        "summary": "Open a reconciliation run",
+        "description": "Takes the repo's reconciliation lease and opens a run. One run may be open per repo; an open run whose lease expired is replaced. The nightly reconciliation runner holds no direct write access to facts: it opens a run, submits proposals, and commits, with the server validating and applying. Requires repo write access.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/RepoID"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "dryRun": {
+                    "type": "boolean",
+                    "description": "Record proposals and the report without applying any fact changes."
+                  },
+                  "model": {
+                    "type": "string"
+                  },
+                  "promptVersion": {
+                    "type": "string"
+                  },
+                  "watermark": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "leaseSeconds": {
+                    "type": "integer",
+                    "description": "Lease length; defaults to 3600, capped at 86400."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The opened run",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "runId": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "type": "string"
+                    },
+                    "dryRun": {
+                      "type": "boolean"
+                    },
+                    "model": {
+                      "type": "string"
+                    },
+                    "promptVersion": {
+                      "type": "string"
+                    },
+                    "watermark": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "createdAt": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "expiresAt": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid body, watermark, or lease",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "409": {
+            "description": "A reconcile run is already open for this repo",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "$ref": "#/components/responses/Internal"
+          },
+          "503": {
+            "$ref": "#/components/responses/Unavailable"
+          }
+        },
+        "tags": [
+          "brainstore"
+        ]
+      },
+      "x-upstream": "brainstore"
+    },
+    "/repos/{repo_id}/brain/reconcile/runs/{run_id}": {
+      "get": {
+        "operationId": "getReconcileRun",
+        "summary": "Read a saved reconciliation run",
+        "description": "Returns metadata, the persisted routing plan, the report, and the commit result. Requires repository read access, without the reconciliation writer allowlist. Completed and expired runs remain readable. Reading does not renew a lease or change the run. Missing artifacts are null.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/RepoID"
+          },
+          {
+            "$ref": "#/components/parameters/ReconcileRunID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Saved run and audit artifacts",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "runId",
+                    "status",
+                    "dryRun",
+                    "model",
+                    "promptVersion",
+                    "createdAt",
+                    "expiresAt",
+                    "updatedAt",
+                    "routingPlan",
+                    "report",
+                    "result"
+                  ],
+                  "properties": {
+                    "runId": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "type": "string"
+                    },
+                    "dryRun": {
+                      "type": "boolean"
+                    },
+                    "model": {
+                      "type": "string"
+                    },
+                    "promptVersion": {
+                      "type": "string"
+                    },
+                    "watermark": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "createdAt": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "expiresAt": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "updatedAt": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "routingPlan": {
+                      "type": "object",
+                      "nullable": true,
+                      "additionalProperties": true
+                    },
+                    "report": {
+                      "nullable": true,
+                      "description": "The caller's report, retained as JSON without schema restriction."
+                    },
+                    "result": {
+                      "type": "object",
+                      "nullable": true,
+                      "additionalProperties": true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid repository or run identifier",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "description": "Run not found in this repository, or repository not hosted in this region",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "$ref": "#/components/responses/Internal"
+          },
+          "503": {
+            "$ref": "#/components/responses/Unavailable"
+          }
+        },
+        "tags": [
+          "brainstore"
+        ]
+      },
+      "x-upstream": "brainstore"
+    },
+    "/repos/{repo_id}/brain/reconcile/runs/{run_id}/proposals": {
+      "post": {
+        "operationId": "submitReconcileProposals",
+        "summary": "Submit reconciliation proposals",
+        "description": "Stores a batch of proposed decisions verbatim, including the runner's gate outcomes and validity-window estimates. Structural rejects are 400 naming the failing fact. Resubmitting a fact id in the same run replaces its proposal. Requires repo write access.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/RepoID"
+          },
+          {
+            "$ref": "#/components/parameters/ReconcileRunID"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "proposals"
+                ],
+                "properties": {
+                  "proposals": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "required": [
+                        "factId",
+                        "action",
+                        "factVersion"
+                      ],
+                      "properties": {
+                        "factId": {
+                          "type": "string"
+                        },
+                        "action": {
+                          "type": "string",
+                          "enum": [
+                            "keep",
+                            "revise",
+                            "retire",
+                            "merge"
+                          ]
+                        },
+                        "text": {
+                          "type": "string",
+                          "nullable": true,
+                          "description": "Complete replacement statement; required for revise."
+                        },
+                        "basis": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          },
+                          "description": "Fact ids justifying a destructive action; required for retire and merge."
+                        },
+                        "sourceRefs": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "validAt": {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        "invalidAt": {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        "reason": {
+                          "type": "string"
+                        },
+                        "gate": {
+                          "type": "object",
+                          "description": "The runner's gate outcome, stored verbatim for audit."
+                        },
+                        "factVersion": {
+                          "type": "string",
+                          "format": "date-time",
+                          "description": "The fact's updatedAt as the proposer saw it (optimistic concurrency token)."
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Accepted batch size",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "accepted": {
+                      "type": "integer"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Structural reject, naming the failing fact",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "description": "Run not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Run is not open (committed, expired, or replaced)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "$ref": "#/components/responses/Internal"
+          },
+          "503": {
+            "$ref": "#/components/responses/Unavailable"
+          }
+        },
+        "tags": [
+          "brainstore"
+        ]
+      },
+      "x-upstream": "brainstore"
+    },
+    "/repos/{repo_id}/brain/reconcile/runs/{run_id}/commit": {
+      "post": {
+        "operationId": "commitReconcileRun",
+        "summary": "Validate and apply a reconciliation run",
+        "description": "Validates every proposal and applies revises and retires as ordinary supersessions and retractions in one transaction, writing the run report with them; or, for a dry run, records outcomes and the report without touching facts. Merge proposals are stored and never applied. Commit without a report is refused (no-report-no-write). A version conflict (409) means refresh and resubmit; an invalid basis (422) is terminal for the proposal as submitted.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/RepoID"
+          },
+          {
+            "$ref": "#/components/parameters/ReconcileRunID"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "report"
+                ],
+                "properties": {
+                  "report": {
+                    "type": "object",
+                    "description": "The run report; stored with the commit."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Commit result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string"
+                    },
+                    "applied": {
+                      "type": "integer"
+                    },
+                    "kept": {
+                      "type": "integer"
+                    },
+                    "noops": {
+                      "type": "integer"
+                    },
+                    "mergesStored": {
+                      "type": "integer"
+                    },
+                    "proposed": {
+                      "type": "integer"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Missing report or invalid body",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "description": "Run not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Run not open, or a fact changed since it was proposed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "A retire's basis is missing, retracted, or resolves to a retracted fact",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "$ref": "#/components/responses/Internal"
+          },
+          "503": {
+            "$ref": "#/components/responses/Unavailable"
+          }
+        },
+        "tags": [
+          "brainstore"
+        ]
+      },
+      "x-upstream": "brainstore"
+    },
     "/agents/models": {
       "get": {
         "description": "Lists the models a project agent may set for each harness, with the harness's default model and reasoning effort. A create or replace whose model is not an accepted id for its harness returns 422; hidden models are accepted but not listed. Requires a signed-in caller.",
@@ -64612,6 +65152,10 @@
             "description": "Display name.",
             "type": "string"
           },
+          "preview": {
+            "description": "True for a model in preview. Saving an agent with it and running it do not depend on any flag.",
+            "type": "boolean"
+          },
           "publisher": {
             "description": "Company that made the model.",
             "type": "string"
@@ -64624,6 +65168,16 @@
             "type": [
               "array",
               "null"
+            ]
+          },
+          "region": {
+            "allOf": [
+              {
+                "description": "Country where the model's serving provider runs it; null when the model is not served from one country. A pi model on the Sarvam route is served in India."
+              },
+              {
+                "$ref": "#/components/schemas/AgentModelRegion"
+              }
             ]
           },
           "visibility": {
@@ -64640,6 +65194,8 @@
           "name",
           "publisher",
           "visibility",
+          "preview",
+          "region",
           "reasoning_efforts"
         ],
         "type": "object"
@@ -64667,6 +65223,10 @@
           "id": {
             "type": "string"
           },
+          "provider": {
+            "description": "Display name of the company that serves the model, which can differ from the harness provider: a pi model on the Sarvam route is served by Sarvam.",
+            "type": "string"
+          },
           "usd_per_million_tokens": {
             "allOf": [
               {
@@ -64680,6 +65240,7 @@
         },
         "required": [
           "id",
+          "provider",
           "usd_per_million_tokens"
         ],
         "type": "object"
@@ -64734,6 +65295,24 @@
           "fetched_at",
           "agents",
           "other_rates"
+        ],
+        "type": "object"
+      },
+      "AgentModelRegion": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "description": "ISO 3166-1 alpha-2 country code, such as IN.",
+            "type": "string"
+          },
+          "name": {
+            "description": "English name of the country.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "name"
         ],
         "type": "object"
       },
@@ -86205,6 +86784,16 @@
       }
     },
     "parameters": {
+      "ReconcileRunID": {
+        "name": "run_id",
+        "in": "path",
+        "required": true,
+        "description": "Reconcile run id (run:<24 hex>)",
+        "schema": {
+          "type": "string",
+          "pattern": "^run:[0-9a-f]{24}$"
+        }
+      },
       "RepoID": {
         "name": "repo_id",
         "in": "path",
