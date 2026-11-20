@@ -7827,6 +7827,28 @@
                     "expiresAt": {
                       "type": "string",
                       "format": "date-time"
+                    },
+                    "stage": {
+                      "type": "string",
+                      "description": "Durable workflow stage, present for internal resumable runs.",
+                      "enum": [
+                        "routing",
+                        "prepare",
+                        "judge",
+                        "ready",
+                        "done",
+                        "conflicted",
+                        "failed"
+                      ]
+                    },
+                    "retryOf": {
+                      "type": "string",
+                      "description": "Previous run ID when a fact-version conflict required a fresh snapshot."
+                    },
+                    "leaseGeneration": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "Worker lease generation for an internal resumable run."
                     }
                   }
                 }
@@ -7937,6 +7959,28 @@
                     "expiresAt": {
                       "type": "string",
                       "format": "date-time"
+                    },
+                    "stage": {
+                      "type": "string",
+                      "description": "Durable workflow stage, present for internal resumable runs.",
+                      "enum": [
+                        "routing",
+                        "prepare",
+                        "judge",
+                        "ready",
+                        "done",
+                        "conflicted",
+                        "failed"
+                      ]
+                    },
+                    "retryOf": {
+                      "type": "string",
+                      "description": "Previous run ID when a fact-version conflict required a fresh snapshot."
+                    },
+                    "leaseGeneration": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "Worker lease generation for an internal resumable run."
                     },
                     "updatedAt": {
                       "type": "string",
@@ -8223,6 +8267,10 @@
                     },
                     "proposed": {
                       "type": "integer"
+                    },
+                    "failureCode": {
+                      "type": "string",
+                      "description": "Failure classification for a replayed workflow outcome."
                     }
                   }
                 }
