@@ -142,6 +142,42 @@
         ],
         "type": "object"
       },
+      "AccountInvited": {
+        "additionalProperties": true,
+        "properties": {
+          "$schema": {
+            "description": "A URL to the JSON Schema for this object.",
+            "examples": [
+              "/api/v1/schemas/AccountInvited.json"
+            ],
+            "format": "uri",
+            "readOnly": true,
+            "type": "string"
+          },
+          "expires_at": {
+            "description": "When the invitation stops being valid.",
+            "format": "date-time",
+            "type": "string"
+          },
+          "invitation_id": {
+            "description": "The open invitation for the account.",
+            "type": "string"
+          },
+          "status": {
+            "description": "Always invited.",
+            "enum": [
+              "invited"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "status",
+          "invitation_id",
+          "expires_at"
+        ],
+        "type": "object"
+      },
       "AccountProfile": {
         "additionalProperties": true,
         "properties": {
@@ -234,6 +270,10 @@
             "format": "uri",
             "readOnly": true,
             "type": "string"
+          },
+          "allow_invitation": {
+            "description": "Set true to let the add invite an account that is outside the organization. The add then answers 202 with an invitation, unless the organization refuses invitations; the operation names that refusal. Without it, that add answers 409 with type https://entire.com/errors/invitation/required and writes nothing. The platform-admin routes ignore it: they always add directly.",
+            "type": "boolean"
           },
           "provider": {
             "minLength": 1,
@@ -3044,6 +3084,10 @@
             "description": "Entire account ULID to grant directly. Mutually exclusive with provider/providerUserId; the account must exist.",
             "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$",
             "type": "string"
+          },
+          "allow_invitation": {
+            "description": "Set true to let the grant invite an account that is outside the parent scope. The grant then answers 202 with an invitation, unless the scope refuses invitations; the operation names those refusals. Without it, that grant answers 409 with type https://entire.com/errors/invitation/required and writes nothing. The platform-admin routes ignore it: they always grant directly.",
+            "type": "boolean"
           },
           "granteeType": {
             "default": "account",
@@ -15263,6 +15307,7 @@
         "x-entire-published": true
       },
       "post": {
+        "description": "The add is direct, and answers 201, when no invitation is needed. On /api/v1 no add to an organization is direct. Any other account is outside this organization and joins only by an invitation that it accepts. Set allow_invitation to create that invitation: the add then answers 202 with invitation_id and expires_at, and the account holds no access until it accepts. Without allow_invitation, that add answers 409 with type https://entire.com/errors/invitation/required and writes nothing. The add checks allow_invitation before the refusals that apply only to an invitation. A retry with allow_invitation therefore invites the account unless this organization refuses invitations; the sentences below name those refusals. 201 never carries an invitation. A repeat add reuses an open invitation for the same role and sends no second mail; another role answers 409 with type https://entire.com/errors/invitation/role-mismatch until the invitation is revoked. An organization that enforces single sign-on admits no account by invitation: an add that would invite into it answers 403 with type https://entire.com/errors/invitation/sso-required, and the account joins by signing in through that single sign-on. Invitation mail to one account is limited: 429 carries Retry-After. The invitation is created on the organization's home core: another core answers 421.",
         "operationId": "addOrgMember",
         "parameters": [
           {
@@ -15294,7 +15339,17 @@
                 }
               }
             },
-            "description": "Created"
+            "description": "Granted. The body is unchanged from before invitations existed."
+          },
+          "202": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccountInvited"
+                }
+              }
+            },
+            "description": "Invited. Only a request that sets allow_invitation receives this."
           },
           "400": {
             "content": {
@@ -15324,7 +15379,7 @@
                 }
               }
             },
-            "description": "Forbidden"
+            "description": "Forbidden. Type https://entire.com/errors/invitation/sso-required means that the organization requires single sign-on and the account is outside it; no invitation is created, and the account joins by signing in through that single sign-on. Other refusals carry no type."
           },
           "404": {
             "content": {
@@ -15344,7 +15399,17 @@
                 }
               }
             },
-            "description": "Conflict"
+            "description": "Conflict. Type https://entire.com/errors/invitation/required means that the account is outside this organization and the request did not set allow_invitation. A retry with allow_invitation invites the account unless this organization refuses invitations: the retry then answers 403 with type https://entire.com/errors/invitation/sso-required for an organization that enforces single sign-on. The retry can also answer the 421, the 429 and the role-mismatch 409 of an invitation. Type https://entire.com/errors/invitation/role-mismatch means that an invitation with another role is open; revoke it first. Other conflicts carry another type or none."
+          },
+          "421": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JurisdictionRedirectError"
+                }
+              }
+            },
+            "description": "Only for a request that sets allow_invitation. Retry against home_core_url in the indicated jurisdiction."
           },
           "422": {
             "content": {
@@ -15355,6 +15420,16 @@
               }
             },
             "description": "Unprocessable Entity"
+          },
+          "429": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Too Many Requests"
           },
           "500": {
             "content": {
@@ -15381,7 +15456,7 @@
             "sessionAuth": []
           }
         ],
-        "summary": "Add a member to an organization",
+        "summary": "Add a member to an organization, or invite the account",
         "tags": [
           "orgs"
         ]
@@ -22051,6 +22126,7 @@
     },
     "/projects/{projectId}/grants": {
       "post": {
+        "description": "The add is direct, and answers 201, when no invitation is needed. On /api/v1 the grant is direct for an active member of the owning organization, an account that already holds a grant on the project, and a service account. Any other account is outside this project and joins only by an invitation that it accepts. Set allow_invitation to create that invitation: the add then answers 202 with invitation_id and expires_at, and the account holds no access until it accepts. Without allow_invitation, that add answers 409 with type https://entire.com/errors/invitation/required and writes nothing. The add checks allow_invitation before the refusals that apply only to an invitation. A retry with allow_invitation therefore invites the account unless this project refuses invitations; the sentences below name those refusals. 201 never carries an invitation. A repeat add reuses an open invitation for the same role and sends no second mail; another role answers 409 with type https://entire.com/errors/invitation/role-mismatch until the invitation is revoked. An organization that enforces single sign-on admits no account by invitation: an add that would invite into it answers 403 with type https://entire.com/errors/invitation/sso-required, and the account joins by signing in through that single sign-on. Invitation mail to one account is limited: 429 carries Retry-After. The invitation is created on the project's home core: another core answers 421.",
         "operationId": "grantProjectAccess",
         "parameters": [
           {
@@ -22082,7 +22158,17 @@
                 }
               }
             },
-            "description": "Created"
+            "description": "Granted. The body is unchanged from before invitations existed."
+          },
+          "202": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccountInvited"
+                }
+              }
+            },
+            "description": "Invited. Only a request that sets allow_invitation receives this."
           },
           "400": {
             "content": {
@@ -22112,7 +22198,7 @@
                 }
               }
             },
-            "description": "Forbidden"
+            "description": "Forbidden. Type https://entire.com/errors/invitation/sso-required means that the organization requires single sign-on and the account is outside it; no invitation is created, and the account joins by signing in through that single sign-on. Other refusals carry no type."
           },
           "404": {
             "content": {
@@ -22132,7 +22218,17 @@
                 }
               }
             },
-            "description": "Conflict"
+            "description": "Conflict. Type https://entire.com/errors/invitation/required means that the account is outside this project and the request did not set allow_invitation. A retry with allow_invitation invites the account unless this project refuses invitations: the retry then answers 403 with type https://entire.com/errors/invitation/sso-required for an organization that enforces single sign-on. The retry can also answer the 421, the 429 and the role-mismatch 409 of an invitation. Type https://entire.com/errors/invitation/role-mismatch means that an invitation with another role is open; revoke it first. Other conflicts carry another type or none."
+          },
+          "421": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JurisdictionRedirectError"
+                }
+              }
+            },
+            "description": "Only for a request that sets allow_invitation. Retry against home_core_url in the indicated jurisdiction."
           },
           "422": {
             "content": {
@@ -22143,6 +22239,16 @@
               }
             },
             "description": "Unprocessable Entity"
+          },
+          "429": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Too Many Requests"
           },
           "500": {
             "content": {
@@ -22169,7 +22275,7 @@
             "sessionAuth": []
           }
         ],
-        "summary": "Grant project access to an identity",
+        "summary": "Grant project access to an account, or invite the account",
         "tags": [
           "projects"
         ]
@@ -26187,6 +26293,7 @@
         ]
       },
       "post": {
+        "description": "The add is direct, and answers 201, when no invitation is needed. On /api/v1 the grant is direct for an account with a grant on the owning project, an active member of the owning organization, an account that already holds a grant on the repository, and a service account. Any other account is outside this repository and joins only by an invitation that it accepts. Set allow_invitation to create that invitation: the add then answers 202 with invitation_id and expires_at, and the account holds no access until it accepts. Without allow_invitation, that add answers 409 with type https://entire.com/errors/invitation/required and writes nothing. The add checks allow_invitation before the refusals that apply only to an invitation. A retry with allow_invitation therefore invites the account unless this repository refuses invitations; the sentences below name those refusals. 201 never carries an invitation. A repeat add reuses an open invitation for the same role and sends no second mail; another role answers 409 with type https://entire.com/errors/invitation/role-mismatch until the invitation is revoked. An organization that enforces single sign-on admits no account by invitation: an add that would invite into it answers 403 with type https://entire.com/errors/invitation/sso-required, and the account joins by signing in through that single sign-on. The add also answers 409, with no type, for a repository of an organization linked to GitHub or outside its project's region: such a repository admits no account by invitation. Invitation mail to one account is limited: 429 carries Retry-After. The invitation is created on the repository's home core: another core answers 421.",
         "operationId": "grantRepoAccess",
         "parameters": [
           {
@@ -26218,7 +26325,17 @@
                 }
               }
             },
-            "description": "Created"
+            "description": "Granted. The body is unchanged from before invitations existed."
+          },
+          "202": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccountInvited"
+                }
+              }
+            },
+            "description": "Invited. Only a request that sets allow_invitation receives this."
           },
           "400": {
             "content": {
@@ -26248,7 +26365,7 @@
                 }
               }
             },
-            "description": "Forbidden"
+            "description": "Forbidden. Type https://entire.com/errors/invitation/sso-required means that the organization requires single sign-on and the account is outside it; no invitation is created, and the account joins by signing in through that single sign-on. Other refusals carry no type."
           },
           "404": {
             "content": {
@@ -26268,7 +26385,17 @@
                 }
               }
             },
-            "description": "Conflict"
+            "description": "Conflict. Type https://entire.com/errors/invitation/required means that the account is outside this repository and the request did not set allow_invitation. A retry with allow_invitation invites the account unless this repository refuses invitations: the retry then answers 403 with type https://entire.com/errors/invitation/sso-required for an organization that enforces single sign-on, or 409 with no type for a repository of an organization linked to GitHub or outside its project's region. The retry can also answer the 421, the 429 and the role-mismatch 409 of an invitation. Type https://entire.com/errors/invitation/role-mismatch means that an invitation with another role is open; revoke it first. Other conflicts carry another type or none."
+          },
+          "421": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JurisdictionRedirectError"
+                }
+              }
+            },
+            "description": "Only for a request that sets allow_invitation. Retry against home_core_url in the indicated jurisdiction."
           },
           "422": {
             "content": {
@@ -26279,6 +26406,16 @@
               }
             },
             "description": "Unprocessable Entity"
+          },
+          "429": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Too Many Requests"
           },
           "500": {
             "content": {
@@ -26305,7 +26442,7 @@
             "sessionAuth": []
           }
         ],
-        "summary": "Grant repo access to an identity",
+        "summary": "Grant repo access to an account, or invite the account",
         "tags": [
           "repos"
         ]
