@@ -5423,6 +5423,10 @@
             "description": "True when the plugin shows in every project's catalog",
             "type": "boolean"
           },
+          "logo_dark_url": {
+            "description": "Logo URL for dark backgrounds, as logo_url. Absent uses logo_url",
+            "type": "string"
+          },
           "logo_url": {
             "description": "Logo URL. A path without a host is on the web app's origin",
             "type": "string"
@@ -5510,6 +5514,10 @@
           },
           "created_at": {
             "format": "date-time",
+            "type": "string"
+          },
+          "logo_dark_url": {
+            "description": "Logo for dark backgrounds. Absent uses logo_url.",
             "type": "string"
           },
           "logo_url": {
@@ -5895,6 +5903,10 @@
             "description": "Shows the plugin in every project's catalog. Requires installable_by any. An unlisted plugin installs through its own install link.",
             "type": "boolean"
           },
+          "logo_dark_url": {
+            "description": "Logo for dark backgrounds, as logo_url. A replace that omits it keeps the stored one. Empty shows logo_url on dark.",
+            "type": "string"
+          },
           "logo_url": {
             "description": "HTTPS URL, or a path on the web app's origin.",
             "type": "string"
@@ -6006,6 +6018,10 @@
           },
           "jwks_url": {
             "description": "HTTPS URL serving the keys that sign the plugin's tokens. Core fetches a new value before saving it.",
+            "type": "string"
+          },
+          "logo_dark_url": {
+            "description": "Logo for dark backgrounds, as logo_url. A replace that omits it keeps the stored one. Empty shows logo_url on dark.",
             "type": "string"
           },
           "logo_url": {
@@ -18526,7 +18542,7 @@
         ]
       },
       "post": {
-        "description": "Requires project#manage on owner_project_id. Any other caller gets 404, as for a project that does not exist. owner_project_id must name a native Entire project; a mirrored project is refused with owner_project_not_native. The plugin starts unlisted. A project owns at most 100 plugins; more is refused with plugin_limit_reached. A project whose owning account has requested deletion is refused with owner_deletion_pending. Entire sets listed and repo_create_daily_limit; the plugin's owner reads them. Core fetches a jwks_url once before saving it. logo_url must name an image the caller uploaded with an entire.com session to PUT /api/v1/plugin-images on the web app origin; a replace may also keep the plugin's current logo. A save that sets a new upload publishes it, and a replace deletes the uploaded logo it replaced. An expired upload is refused with logo_upload_expired. A create whose logo is refused still creates the plugin, without a published logo.",
+        "description": "Requires project#manage on owner_project_id. Any other caller gets 404, as for a project that does not exist. owner_project_id must name a native Entire project; a mirrored project is refused with owner_project_not_native. The plugin starts unlisted. A project owns at most 100 plugins; more is refused with plugin_limit_reached. A project whose owning account has requested deletion is refused with owner_deletion_pending. Entire sets listed and repo_create_daily_limit; the plugin's owner reads them. Core fetches a jwks_url once before saving it. logo_url and a non-empty logo_dark_url must name an image the caller uploaded with an entire.com session to PUT /api/v1/plugin-images on the web app origin; a replace may also keep the plugin's current logo. A save that sets a new upload publishes it, and a replace deletes each uploaded logo it no longer names. An expired upload is refused with logo_upload_expired. A create whose logo is refused still creates the plugin, without a published logo.",
         "operationId": "createPluginRegistration",
         "requestBody": {
           "content": {
@@ -18879,7 +18895,7 @@
         ]
       },
       "put": {
-        "description": "Requires project#manage on the plugin's owner project. Any other caller gets 404. Full replace of the owner settings. The slug and owner_project_id cannot change. Entire sets listed and repo_create_daily_limit; the plugin's owner reads them. Core fetches a changed jwks_url once before saving it. logo_url must name an image the caller uploaded with an entire.com session to PUT /api/v1/plugin-images on the web app origin; a replace may also keep the plugin's current logo. A save that sets a new upload publishes it, and a replace deletes the uploaded logo it replaced. An expired upload is refused with logo_upload_expired. ",
+        "description": "Requires project#manage on the plugin's owner project. Any other caller gets 404. Full replace of the owner settings. The slug and owner_project_id cannot change. Entire sets listed and repo_create_daily_limit; the plugin's owner reads them. Core fetches a changed jwks_url once before saving it. logo_url and a non-empty logo_dark_url must name an image the caller uploaded with an entire.com session to PUT /api/v1/plugin-images on the web app origin; a replace may also keep the plugin's current logo. A save that sets a new upload publishes it, and a replace deletes each uploaded logo it no longer names. An expired upload is refused with logo_upload_expired. ",
         "operationId": "replacePluginRegistration",
         "parameters": [
           {

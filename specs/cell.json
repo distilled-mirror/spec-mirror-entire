@@ -6338,7 +6338,7 @@
     },
     "/ci/plugins/{plugin}/deliveries": {
       "get": {
-        "description": "Recent event deliveries to the plugin's webhook URL, newest first. Requires an account access token that holds project#manage on the plugin's owner project. Each cell holds the deliveries it sent, so this lists this cell's deliveries only.",
+        "description": "Recent event deliveries to the plugin's webhook URL, newest first. Requires an account access token that holds project#manage on the plugin's owner project. Each cell holds the deliveries it sent, so this reaches this cell's deliveries only.",
         "operationId": "listPluginDeliveries",
         "parameters": [
           {
@@ -6482,7 +6482,7 @@
     },
     "/ci/plugins/{plugin}/deliveries/{id}": {
       "get": {
-        "description": "The stored request and every recorded attempt with its response. Requires an account access token that holds project#manage on the plugin's owner project. Each cell holds the deliveries it sent, so this lists this cell's deliveries only.",
+        "description": "The stored request and every recorded attempt with its response. Requires an account access token that holds project#manage on the plugin's owner project. Each cell holds the deliveries it sent, so this reaches this cell's deliveries only.",
         "operationId": "getPluginDelivery",
         "parameters": [
           {
@@ -6594,6 +6594,148 @@
           }
         ],
         "summary": "Get a plugin webhook delivery and its attempts",
+        "tags": [
+          "plugin-deliveries"
+        ]
+      },
+      "x-upstream": "ci-webhooks"
+    },
+    "/ci/plugins/{plugin}/deliveries/{id}/redeliver": {
+      "post": {
+        "description": "Sends a delivered or failed delivery's event again as a new delivery. The new delivery has its own delivery_id and the full retry schedule. Its event.id is the source's. A repeat with the same Idempotency-Key returns the same new delivery and sends nothing more. A pending or in_flight delivery is 409. Requires an account access token that holds project#manage on the plugin's owner project. Each cell holds the deliveries it sent, so this reaches this cell's deliveries only.",
+        "operationId": "redeliverPluginDelivery",
+        "parameters": [
+          {
+            "description": "Plugin slug",
+            "in": "path",
+            "name": "plugin",
+            "required": true,
+            "schema": {
+              "description": "Plugin slug",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Delivery id",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "description": "Delivery id",
+              "type": "string"
+            }
+          },
+          {
+            "description": "A repeat of this request with the same key returns the same delivery.",
+            "in": "header",
+            "name": "Idempotency-Key",
+            "required": true,
+            "schema": {
+              "description": "A repeat of this request with the same key returns the same delivery.",
+              "maxLength": 255,
+              "minLength": 1,
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PluginDeliveryView"
+                }
+              }
+            },
+            "description": "Created"
+          },
+          "400": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ci-webhooks__ErrorModel"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ci-webhooks__ErrorModel"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ci-webhooks__ErrorModel"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ci-webhooks__ErrorModel"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ci-webhooks__ErrorModel"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "422": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ci-webhooks__ErrorModel"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ci-webhooks__ErrorModel"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          },
+          "503": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ci-webhooks__ErrorModel"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Redeliver a plugin webhook delivery",
         "tags": [
           "plugin-deliveries"
         ]
@@ -63083,6 +63225,15 @@
       "PluginDeliveryView": {
         "additionalProperties": true,
         "properties": {
+          "$schema": {
+            "description": "A URL to the JSON Schema for this object.",
+            "examples": [
+              "/api/v1/schemas/PluginDeliveryView.json"
+            ],
+            "format": "uri",
+            "readOnly": true,
+            "type": "string"
+          },
           "attempt_count": {
             "description": "Attempts claimed so far, including one in flight",
             "format": "int64",
@@ -63165,6 +63316,7 @@
             "type": "string"
           },
           "id": {
+            "description": "user_ and the account's ULID. The same value as sub in a plugin ID token.",
             "type": "string"
           }
         },
@@ -63186,7 +63338,7 @@
             "type": "string"
           },
           "delivery_id": {
-            "description": "Unique to this delivery and the same across retries. Deduplicate on it.",
+            "description": "Unique to this delivery and the same across retries. A redelivery from the delivery log has a new one. Deduplicate on it.",
             "type": "string"
           },
           "event": {
@@ -63214,7 +63366,7 @@
         "additionalProperties": true,
         "properties": {
           "id": {
-            "description": "The same for every installation that receives this event.",
+            "description": "The same for every installation that receives this event, and for each redelivery of it.",
             "type": "string"
           },
           "payload": {
@@ -63248,7 +63400,7 @@
             "type": "string"
           },
           "delivery_id": {
-            "description": "Derived from the event, so it is the same across retries. Deduplicate on it.",
+            "description": "Derived from the event, so it is the same across retries. A redelivery from the delivery log has a new one. Deduplicate on it.",
             "type": "string"
           },
           "event": {
@@ -63276,7 +63428,7 @@
         "additionalProperties": true,
         "properties": {
           "id": {
-            "description": "Derived from the event, so it is the same across retries.",
+            "description": "Derived from the event, so it is the same across retries and redeliveries.",
             "type": "string"
           },
           "payload": {
@@ -63552,6 +63704,7 @@
         "additionalProperties": true,
         "properties": {
           "id": {
+            "description": "A user's ID is user_ and the account's ULID, the same value as sub in a plugin ID token. A service account keeps its svc_ ID.",
             "type": "string"
           }
         },
@@ -63632,7 +63785,7 @@
             "type": "string"
           },
           "delivery_id": {
-            "description": "Unique to this delivery and the same across retries. Deduplicate on it.",
+            "description": "Unique to this delivery and the same across retries. A redelivery from the delivery log has a new one. Deduplicate on it.",
             "type": "string"
           },
           "event": {
@@ -63660,7 +63813,7 @@
         "additionalProperties": true,
         "properties": {
           "id": {
-            "description": "The same for every installation that receives this event.",
+            "description": "The same for every installation that receives this event, and for each redelivery of it.",
             "type": "string"
           },
           "payload": {
@@ -63758,7 +63911,7 @@
             "type": "string"
           },
           "delivery_id": {
-            "description": "Unique to this delivery and the same across retries. Deduplicate on it.",
+            "description": "Unique to this delivery and the same across retries. A redelivery from the delivery log has a new one. Deduplicate on it.",
             "type": "string"
           },
           "event": {
@@ -63786,7 +63939,7 @@
         "additionalProperties": true,
         "properties": {
           "id": {
-            "description": "The same for every installation that receives this event.",
+            "description": "The same for every installation that receives this event, and for each redelivery of it.",
             "type": "string"
           },
           "payload": {
