@@ -8480,7 +8480,7 @@
     },
     "/agents/models": {
       "get": {
-        "description": "Lists the models a project agent may set for each harness, with the harness's default model and reasoning effort. A create or replace whose model is not an accepted id for its harness returns 422; hidden models are accepted but not listed. Requires a signed-in caller.",
+        "description": "Lists model ids, reasoning efforts, and each legacy model family's default. Hosted custom writes can send a unique model id without a harness. To copy a default selection from a legacy agent, send its family's default_model id. Hidden models are accepted but not listed. Requires a signed-in caller.",
         "operationId": "agentModelsList",
         "responses": {
           "200": {
@@ -49025,7 +49025,7 @@
         ]
       },
       "post": {
-        "description": "Saves a new agent in the project at version 1 and returns it with its JSON etag write token, HTTP ETag and Location. Saving runs nothing. Send preset for an Entire preset with its environment, repository_ids, triggers and is_enabled, or every field and a name for a custom agent. Send environment_id, environment (saved in the same transaction as an ordinary, reusable project record; any refusal saves nothing) or runs_on self_hosted alone (the project's managed self-hosted environment). runs_on may accompany environment_id or environment when it equals that environment's runs_on, so an agent read can be sent back; a mismatch is 422. Agent names are unique among the project's active agents, ignoring case, and a project runs each preset at most once among its active agents (409 otherwise). It selects repositories of the project and requires repository push on each, recorded as repository_added events. Saving starts no run. Idempotency-Key is required: a retry with the same key and body saves nothing and returns the agent the first attempt saved, at its current version, with Idempotency-Replayed: true; the same key with a different body returns 409. A key is scoped to the caller, the project and agents, and does not expire. Bodies use the typed request schema; unknown fields, including spec wrappers and server-owned fields, are refused. Requires canManageAgents (automation principals require project write or manage). Route requests to the project's API URL returned by Core.",
+        "description": "Saves a new agent in the project at version 1 and returns it with its JSON etag write token, HTTP ETag and Location. Saving runs nothing. Send preset for an Entire preset with its environment, repository_ids, triggers and is_enabled. For a custom hosted agent, send the custom definition without harness. Send a model id or omit it to use the Pi family default. Legacy writes with a harness, including custom self-hosted writes, still use that family's default when model is omitted. Send environment_id, environment (saved in the same transaction as an ordinary, reusable project record; any refusal saves nothing) or runs_on self_hosted alone (the project's managed self-hosted environment). runs_on may accompany environment_id or environment when it equals that environment's runs_on, so an agent read can be sent back; a mismatch is 422. Agent names are unique among the project's active agents, ignoring case, and a project runs each preset at most once among its active agents (409 otherwise). It selects repositories of the project and requires repository push on each, recorded as repository_added events. Saving starts no run. Idempotency-Key is required: a retry with the same key and body saves nothing and returns the agent the first attempt saved, at its current version, with Idempotency-Replayed: true; the same key with a different body returns 409. A key is scoped to the caller, the project and agents, and does not expire. Bodies use the typed request schema; unknown fields, including spec wrappers and server-owned fields, are refused. Requires canManageAgents (automation principals require project write or manage). Route requests to the project's API URL returned by Core.",
         "operationId": "projectAgentsCreate",
         "parameters": [
           {
@@ -49377,7 +49377,7 @@
         ]
       },
       "put": {
-        "description": "Replaces every editable field as a new immutable version; omitted optional fields take their defaults. Send If-Match with the JSON etag value of the last read or write: missing returns 428 and stale returns 412. An archived agent returns 409. Every field, as for a create, with environment_id or runs_on self_hosted alone; runs_on may accompany environment_id when it equals the environment's runs_on, so an agent read can be sent back. A preset agent's name, model, instructions and signal are the preset's: a replace that sends different ones is refused (422); send preset null with every field to customize the agent under the same id. It saves a version only when what the agent runs changes; repository_ids is applied as adds and removes. is_enabled, if sent, must match the agent's state (422 agent_state_not_replaceable). Requires push on each repository it adds, and on each one it keeps when it saves a version, departed ones included. Removing a repository needs no push. Requires canManageAgents (automation principals require project write or manage). Route requests to the project's API URL returned by Core.",
+        "description": "Replaces every editable field as a new immutable version; omitted optional fields take their defaults. Send If-Match with the JSON etag value of the last read or write: missing returns 428 and stale returns 412. An archived agent returns 409. Send the definition as for a create, with environment_id or runs_on self_hosted alone. On a hosted model-only replace, omitting model or sending null retains the current selection. runs_on may accompany environment_id when it matches, so an agent read can be sent back. A preset agent's name, model, instructions and signal are the preset's: a replace that sends different ones is refused (422); send preset null with a custom definition to customize the agent under the same id. It saves a version only when what the agent runs changes; repository_ids is applied as adds and removes. is_enabled, if sent, must match the agent's state (422 agent_state_not_replaceable). Requires push on each repository it adds, and on each one it keeps when it saves a version, departed ones included. Removing a repository needs no push. Requires canManageAgents (automation principals require project write or manage). Route requests to the project's API URL returned by Core.",
         "operationId": "projectAgentReplace",
         "parameters": [
           {
@@ -58146,7 +58146,7 @@
   "webhooks": {
     "installation.created": {
       "post": {
-        "description": "A customer installed the plugin on a project.",
+        "description": "A customer installed the plugin on a project. Sent to every plugin. Installation events are in no event group.",
         "operationId": "pluginWebhookInstallationCreated",
         "parameters": [
           {
@@ -58197,7 +58197,7 @@
     },
     "installation.deleted": {
       "post": {
-        "description": "The plugin was uninstalled from the project.",
+        "description": "The plugin was uninstalled from the project. Sent to every plugin. Installation events are in no event group.",
         "operationId": "pluginWebhookInstallationDeleted",
         "parameters": [
           {
@@ -58248,7 +58248,7 @@
     },
     "installation.repositories_added": {
       "post": {
-        "description": "Repositories were added to the installation.",
+        "description": "Repositories were added to the installation. Sent to every plugin. Installation events are in no event group.",
         "operationId": "pluginWebhookInstallationRepositoriesAdded",
         "parameters": [
           {
@@ -58299,7 +58299,7 @@
     },
     "installation.repositories_removed": {
       "post": {
-        "description": "Repositories were removed from the installation.",
+        "description": "Repositories were removed from the installation. Sent to every plugin. Installation events are in no event group.",
         "operationId": "pluginWebhookInstallationRepositoriesRemoved",
         "parameters": [
           {
@@ -58350,7 +58350,7 @@
     },
     "installation.updated": {
       "post": {
-        "description": "An installation changed.",
+        "description": "An installation changed. Sent to every plugin. Installation events are in no event group.",
         "operationId": "pluginWebhookInstallationUpdated",
         "parameters": [
           {
@@ -58401,7 +58401,7 @@
     },
     "ref.created": {
       "post": {
-        "description": "A branch or tag was created in a repository the installation covers.",
+        "description": "A branch or tag was created in a repository the installation covers. Sent to plugins that subscribe to the `ref` event group. A group can gain event types, so answer 2xx to an event type you do not handle.",
         "operationId": "pluginWebhookRefCreated",
         "parameters": [
           {
@@ -58452,7 +58452,7 @@
     },
     "ref.deleted": {
       "post": {
-        "description": "A branch or tag was deleted.",
+        "description": "A branch or tag was deleted. Sent to plugins that subscribe to the `ref` event group. A group can gain event types, so answer 2xx to an event type you do not handle.",
         "operationId": "pluginWebhookRefDeleted",
         "parameters": [
           {
@@ -58503,7 +58503,7 @@
     },
     "ref.updated": {
       "post": {
-        "description": "A branch or tag moved. A force push sets forced to true.",
+        "description": "A branch or tag moved. A force push sets forced to true. Sent to plugins that subscribe to the `ref` event group. A group can gain event types, so answer 2xx to an event type you do not handle.",
         "operationId": "pluginWebhookRefUpdated",
         "parameters": [
           {
@@ -58554,7 +58554,7 @@
     },
     "trail.closed": {
       "post": {
-        "description": "A trail was closed without a merge.",
+        "description": "A trail was closed without a merge. Sent to plugins that subscribe to the `trail` event group. A group can gain event types, so answer 2xx to an event type you do not handle.",
         "operationId": "pluginWebhookTrailClosed",
         "parameters": [
           {
@@ -58605,7 +58605,7 @@
     },
     "trail.gates.updated": {
       "post": {
-        "description": "A gate's status changed on a trail's head commit. Sent only when the status changes. previous_status is null when there is no earlier result to compare. gates gives the overall state: every enabled gate on the trail at head_sha. version orders a trail's gate events, which can arrive out of order.",
+        "description": "A gate's status changed on a trail's head commit. Sent only when the status changes. previous_status is null when there is no earlier result to compare. gates gives the overall state: every enabled gate on the trail at head_sha. version orders a trail's gate events, which can arrive out of order. Sent to plugins that subscribe to the `trail_gates` event group. A group can gain event types, so answer 2xx to an event type you do not handle.",
         "operationId": "pluginWebhookTrailGatesUpdated",
         "parameters": [
           {
@@ -58656,7 +58656,7 @@
     },
     "trail.merged": {
       "post": {
-        "description": "A trail was merged into its base.",
+        "description": "A trail was merged into its base. Sent to plugins that subscribe to the `trail` event group. A group can gain event types, so answer 2xx to an event type you do not handle.",
         "operationId": "pluginWebhookTrailMerged",
         "parameters": [
           {
@@ -58707,7 +58707,7 @@
     },
     "trail.opened": {
       "post": {
-        "description": "A trail was opened, as a draft or ready. Opening a trail does not push a commit, so no ref event may follow.",
+        "description": "A trail was opened, as a draft or ready. Opening a trail does not push a commit, so no ref event may follow. Sent to plugins that subscribe to the `trail` event group. A group can gain event types, so answer 2xx to an event type you do not handle.",
         "operationId": "pluginWebhookTrailOpened",
         "parameters": [
           {
@@ -58758,7 +58758,7 @@
     },
     "trail.reopened": {
       "post": {
-        "description": "A closed trail was opened again.",
+        "description": "A closed trail was opened again. Sent to plugins that subscribe to the `trail` event group. A group can gain event types, so answer 2xx to an event type you do not handle.",
         "operationId": "pluginWebhookTrailReopened",
         "parameters": [
           {
@@ -58809,7 +58809,7 @@
     },
     "trail.updated": {
       "post": {
-        "description": "An open or draft trail changed its head commit, branch, base, title, or draft state. changes names each field that changed.",
+        "description": "An open or draft trail changed its head commit, branch, base, title, or draft state. changes names each field that changed. Sent to plugins that subscribe to the `trail` event group. A group can gain event types, so answer 2xx to an event type you do not handle.",
         "operationId": "pluginWebhookTrailUpdated",
         "parameters": [
           {
@@ -63326,6 +63326,59 @@
         ],
         "type": "object"
       },
+      "PluginWebhookCommit": {
+        "additionalProperties": true,
+        "properties": {
+          "author": {
+            "allOf": [
+              {
+                "description": "The git author. Git records it and Entire does not verify it."
+              },
+              {
+                "$ref": "#/components/schemas/PluginWebhookCommitSignature"
+              }
+            ]
+          },
+          "committer": {
+            "allOf": [
+              {
+                "description": "The git committer. Git records it and Entire does not verify it. Absent when Entire did not record it."
+              },
+              {
+                "$ref": "#/components/schemas/PluginWebhookCommitSignature"
+              }
+            ]
+          },
+          "subject": {
+            "description": "The first line of the commit message, cut to 512 bytes.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "subject",
+          "author"
+        ],
+        "type": [
+          "object",
+          "null"
+        ]
+      },
+      "PluginWebhookCommitSignature": {
+        "additionalProperties": true,
+        "properties": {
+          "email": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "email"
+        ],
+        "type": "object"
+      },
       "PluginWebhookDelivery": {
         "additionalProperties": true,
         "properties": {
@@ -63561,6 +63614,16 @@
             "description": "Object ID before the change. All zeros on create.",
             "type": "string"
           },
+          "commit": {
+            "allOf": [
+              {
+                "description": "The after commit. Null on delete, or when Entire did not read the commit."
+              },
+              {
+                "$ref": "#/components/schemas/PluginWebhookCommit"
+              }
+            ]
+          },
           "forced": {
             "type": "boolean"
           },
@@ -63587,7 +63650,8 @@
           "before",
           "after",
           "forced",
-          "pusher"
+          "pusher",
+          "commit"
         ],
         "type": "object"
       },
@@ -63839,7 +63903,7 @@
         "additionalProperties": true,
         "properties": {
           "blocking": {
-            "description": "Whether the gate blocks the trail from merging.",
+            "description": "Whether the gate blocks merging.",
             "type": "boolean"
           },
           "key": {
@@ -63875,7 +63939,7 @@
         "additionalProperties": true,
         "properties": {
           "blocking": {
-            "description": "Whether the gate blocks the trail from merging.",
+            "description": "Whether the gate blocks merging.",
             "type": "boolean"
           },
           "key": {
@@ -64007,7 +64071,7 @@
           "actor": {
             "allOf": [
               {
-                "description": "Who made the change. Null when Entire does not know, such as for a push or a change on the forge."
+                "description": "Who made the change. For a push that moved head_sha, the account that pushed. Null when Entire does not know, such as for a change on the forge."
               },
               {
                 "$ref": "#/components/schemas/PluginWebhookTrailActor"
@@ -64024,6 +64088,16 @@
               }
             ]
           },
+          "commit": {
+            "allOf": [
+              {
+                "description": "The head_sha commit, when a push or the trail opening set head_sha. Null otherwise."
+              },
+              {
+                "$ref": "#/components/schemas/PluginWebhookCommit"
+              }
+            ]
+          },
           "repository": {
             "$ref": "#/components/schemas/PluginWebhookTrailRepository"
           },
@@ -64034,7 +64108,8 @@
         "required": [
           "repository",
           "trail",
-          "actor"
+          "actor",
+          "commit"
         ],
         "type": "object"
       },
@@ -64501,7 +64576,7 @@
             "type": "string"
           },
           "harness": {
-            "description": "Agent CLI that runs the instructions.",
+            "description": "Legacy model family (and CLI for self-hosted agents). Returned for existing clients; omit on hosted writes that select a model by id.",
             "type": "string"
           },
           "id": {
@@ -64517,7 +64592,7 @@
             "type": "boolean"
           },
           "model": {
-            "description": "Model passed to the harness; null uses the harness default.",
+            "description": "Configured model id. Null preserves the model family's default selection; GET /agents/models lists each family's default model id.",
             "type": [
               "string",
               "null"
@@ -64807,7 +64882,7 @@
             "type": "string"
           },
           "harness": {
-            "description": "Agent CLI that runs the instructions. Required without a preset.",
+            "description": "Legacy model family. Omit for hosted model-only authoring. Still accepted with its original model/default semantics and required for custom self-hosted agents.",
             "enum": [
               "claude",
               "codex",
@@ -64825,7 +64900,7 @@
             "type": "boolean"
           },
           "model": {
-            "description": "Model passed to the harness: an id GET /agents/models lists for it. Omit or send null for the harness default.",
+            "description": "Model id from GET /agents/models. With no harness on a hosted custom create, null or omission selects the Pi family default. With no harness on a replace, null or omission keeps the current selection. With legacy harness present, null or omission selects that family's default.",
             "maxLength": 128,
             "minLength": 1,
             "type": [
@@ -64848,7 +64923,7 @@
             ]
           },
           "reasoning_effort": {
-            "description": "Reasoning effort: one of the reasoning_efforts GET /agents/models lists for the model the agent runs (the harness default model when model is null). Any other value returns 422. Omit or send null to save the harness's default_reasoning_effort, or none when the model takes none.",
+            "description": "Reasoning effort: one of the reasoning_efforts GET /agents/models lists for the model the agent runs (the harness default model when model is null). Any other value returns 422. Omit or send null to use the family's default_reasoning_effort (or none if the model takes none). A hosted model-only replace keeping the current model selection also keeps its explicit saved effort when effort is omitted or null.",
             "enum": [
               "low",
               "medium",
@@ -64922,7 +64997,7 @@
             "type": "string"
           },
           "harness": {
-            "description": "Agent CLI that runs the instructions.",
+            "description": "Legacy model family (and CLI for self-hosted agents). Returned for existing clients; omit on hosted writes that select a model by id.",
             "type": "string"
           },
           "instructions": {
@@ -64930,7 +65005,7 @@
             "type": "string"
           },
           "model": {
-            "description": "Model passed to the harness; null uses the harness default.",
+            "description": "Configured model id. Null preserves the model family's default selection; GET /agents/models lists each family's default model id.",
             "type": [
               "string",
               "null"
@@ -65063,7 +65138,7 @@
             ]
           },
           "harness": {
-            "description": "Agent CLI the models run under.",
+            "description": "Model family, kept for legacy clients and self-hosted agents. Hosted writers can send a unique model id without it.",
             "enum": [
               "claude",
               "codex",
@@ -65188,7 +65263,7 @@
             "type": "string"
           },
           "harness": {
-            "description": "Agent CLI that runs the instructions.",
+            "description": "Legacy model family (and CLI for self-hosted agents). Returned for existing clients; omit on hosted writes that select a model by id.",
             "type": "string"
           },
           "id": {
@@ -65204,7 +65279,7 @@
             "type": "boolean"
           },
           "model": {
-            "description": "Model passed to the harness; null uses the harness default.",
+            "description": "Configured model id. Null preserves the model family's default selection; GET /agents/models lists each family's default model id.",
             "type": [
               "string",
               "null"
@@ -65684,7 +65759,7 @@
             "type": "string"
           },
           "harness": {
-            "description": "Agent CLI that runs the instructions. Required without a preset.",
+            "description": "Legacy model family. Omit for hosted model-only authoring. Still accepted with its original model/default semantics and required for custom self-hosted agents.",
             "enum": [
               "claude",
               "codex",
@@ -65702,7 +65777,7 @@
             "type": "boolean"
           },
           "model": {
-            "description": "Model passed to the harness: an id GET /agents/models lists for it. Omit or send null for the harness default.",
+            "description": "Model id from GET /agents/models. With no harness on a hosted custom create, null or omission selects the Pi family default. With no harness on a replace, null or omission keeps the current selection. With legacy harness present, null or omission selects that family's default.",
             "maxLength": 128,
             "minLength": 1,
             "type": [
@@ -65725,7 +65800,7 @@
             ]
           },
           "reasoning_effort": {
-            "description": "Reasoning effort: one of the reasoning_efforts GET /agents/models lists for the model the agent runs (the harness default model when model is null). Any other value returns 422. Omit or send null to save the harness's default_reasoning_effort, or none when the model takes none.",
+            "description": "Reasoning effort: one of the reasoning_efforts GET /agents/models lists for the model the agent runs (the harness default model when model is null). Any other value returns 422. Omit or send null to use the family's default_reasoning_effort (or none if the model takes none). A hosted model-only replace keeping the current model selection also keeps its explicit saved effort when effort is omitted or null.",
             "enum": [
               "low",
               "medium",
@@ -66025,7 +66100,7 @@
             "type": "string"
           },
           "harness": {
-            "description": "Agent CLI that runs the instructions.",
+            "description": "Legacy model family (and CLI for self-hosted agents). Returned for existing clients; omit on hosted writes that select a model by id.",
             "type": "string"
           },
           "instructions": {
@@ -66033,7 +66108,7 @@
             "type": "string"
           },
           "model": {
-            "description": "Model passed to the harness; null uses the harness default.",
+            "description": "Configured model id. Null preserves the model family's default selection; GET /agents/models lists each family's default model id.",
             "type": [
               "string",
               "null"
@@ -75518,7 +75593,7 @@
             "type": "string"
           },
           "assignees": {
-            "description": "Actor references: ulid:ACCOUNT_ID or @username. A bare string is a GitHub login (legacy).",
+            "description": "Actor references: ulid:ACCOUNT_ID or @username. A bare string is a GitHub login (legacy). Left out, a person's Trail is assigned to them; send [] to leave it unassigned. Automation-created Trails start unassigned.",
             "items": {
               "type": "string"
             },
