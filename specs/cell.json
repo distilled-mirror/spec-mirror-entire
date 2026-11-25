@@ -29512,7 +29512,7 @@
     },
     "/repos/{repo_id}/runs": {
       "get": {
-        "description": "Pages the runs in this repository of the agents of the project that owns it, newest first, archived agents' included. Each run is summarized without the Environment it pinned or the subject paying for it; GET /repos/{repo_id}/runs/{id} returns the whole run as the caller may read it. Requires pull on the repository.",
+        "description": "Pages the runs in this repository of the agents of the project that owns it, newest first, archived agents' included. Each run is summarized without the Environment it pinned or the subject paying for it; GET /repos/{repo_id}/runs/{id} returns the whole run as the caller may read it. Requires pull on the repository. A plugin installation with agents:run and without project write or manage lists only the runs it started.",
         "operationId": "repoRunsList",
         "parameters": [
           {
@@ -29718,7 +29718,7 @@
         ]
       },
       "post": {
-        "description": "Starts one run of the agent on a Change in this repository, as POST /{host}/{project}/agents/{id}/runs does. A Change in another repository reads as none (422). Requires pull on the repository, and push to start, retry or cancel; nothing of the project that owns it. billing_subject is returned only to the project's readers, events and diagnostic only with push or canManageAgents, and the agent's configuration only with canManageAgents.",
+        "description": "Starts one run of the agent on a Change in this repository, as POST /{host}/{project}/agents/{id}/runs does. A Change in another repository reads as none (422). Requires pull on the repository, and push to start, retry or cancel; nothing of the project that owns it. billing_subject is returned only to the project's readers, events and diagnostic only with push or canManageAgents, and the agent's configuration only with canManageAgents. A plugin installation token with agents:run and pull, without project write or manage, starts runs of the project's enabled agents in place of push (a write run still needs push), and reads, retries and cancels only the runs its installation started; any other run is 404, and events and diagnostic are always empty and null for it.",
         "operationId": "repoRunsCreate",
         "parameters": [
           {
@@ -29899,7 +29899,7 @@
     },
     "/repos/{repo_id}/runs/{id}": {
       "get": {
-        "description": "Returns one of the repository's runs as GET /{host}/{project}/runs/{id} does. Requires pull on the repository, and push to start, retry or cancel; nothing of the project that owns it. billing_subject is returned only to the project's readers, events and diagnostic only with push or canManageAgents, and the agent's configuration only with canManageAgents.",
+        "description": "Returns one of the repository's runs as GET /{host}/{project}/runs/{id} does. Requires pull on the repository, and push to start, retry or cancel; nothing of the project that owns it. billing_subject is returned only to the project's readers, events and diagnostic only with push or canManageAgents, and the agent's configuration only with canManageAgents. A plugin installation token with agents:run and pull, without project write or manage, starts runs of the project's enabled agents in place of push (a write run still needs push), and reads, retries and cancels only the runs its installation started; any other run is 404, and events and diagnostic are always empty and null for it.",
         "operationId": "repoRunGet",
         "parameters": [
           {
@@ -30035,7 +30035,7 @@
     },
     "/repos/{repo_id}/runs/{id}/cancel": {
       "post": {
-        "description": "Cancels one of the repository's runs, as POST /{host}/{project}/runs/{id}/cancel does. Requires pull on the repository, and push to start, retry or cancel; nothing of the project that owns it. billing_subject is returned only to the project's readers, events and diagnostic only with push or canManageAgents, and the agent's configuration only with canManageAgents.",
+        "description": "Cancels one of the repository's runs, as POST /{host}/{project}/runs/{id}/cancel does. Requires pull on the repository, and push to start, retry or cancel; nothing of the project that owns it. billing_subject is returned only to the project's readers, events and diagnostic only with push or canManageAgents, and the agent's configuration only with canManageAgents. A plugin installation token with agents:run and pull, without project write or manage, starts runs of the project's enabled agents in place of push (a write run still needs push), and reads, retries and cancels only the runs its installation started; any other run is 404, and events and diagnostic are always empty and null for it.",
         "operationId": "repoRunCancel",
         "parameters": [
           {
@@ -30171,7 +30171,7 @@
     },
     "/repos/{repo_id}/runs/{id}/retry": {
       "post": {
-        "description": "Starts the next attempt of one of the repository's runs, as POST /{host}/{project}/runs/{id}/retry does. Requires pull on the repository, and push to start, retry or cancel; nothing of the project that owns it. billing_subject is returned only to the project's readers, events and diagnostic only with push or canManageAgents, and the agent's configuration only with canManageAgents.",
+        "description": "Starts the next attempt of one of the repository's runs, as POST /{host}/{project}/runs/{id}/retry does. Requires pull on the repository, and push to start, retry or cancel; nothing of the project that owns it. billing_subject is returned only to the project's readers, events and diagnostic only with push or canManageAgents, and the agent's configuration only with canManageAgents. A plugin installation token with agents:run and pull, without project write or manage, starts runs of the project's enabled agents in place of push (a write run still needs push), and reads, retries and cancels only the runs its installation started; any other run is 404, and events and diagnostic are always empty and null for it.",
         "operationId": "repoRunRetry",
         "parameters": [
           {
@@ -30340,7 +30340,7 @@
     },
     "/repos/{repo_id}/runs/{id}/snapshot": {
       "get": {
-        "description": "Returns the snapshot one of the repository's runs was admitted with, as GET /{host}/{project}/runs/{id}/snapshot does. Requires pull on the repository, and push to start, retry or cancel; nothing of the project that owns it. billing_subject is returned only to the project's readers, events and diagnostic only with push or canManageAgents, and the agent's configuration only with canManageAgents.",
+        "description": "Returns the snapshot one of the repository's runs was admitted with, as GET /{host}/{project}/runs/{id}/snapshot does. Requires pull on the repository, and push to start, retry or cancel; nothing of the project that owns it. billing_subject is returned only to the project's readers, events and diagnostic only with push or canManageAgents, and the agent's configuration only with canManageAgents. A plugin installation token with agents:run and pull, without project write or manage, starts runs of the project's enabled agents in place of push (a write run still needs push), and reads, retries and cancels only the runs its installation started; any other run is 404, and events and diagnostic are always empty and null for it.",
         "operationId": "repoRunSnapshotGet",
         "parameters": [
           {
@@ -58552,9 +58552,316 @@
         "x-entire-published": true
       }
     },
+    "trail.change.closed": {
+      "post": {
+        "description": "A change was closed without a merge. Sent to plugins that subscribe to the `trail_change` event group. A group can gain event types, so answer 2xx to an event type you do not handle.",
+        "operationId": "pluginWebhookTrailChangeClosed",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "User-Agent",
+            "required": true,
+            "schema": {
+              "enum": [
+                "Entire-Webhooks/1"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PluginWebhookTrailChangeDelivery"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "429": {
+            "description": "Retried up to 7 times over about 15 minutes with the same delivery_id, as are network errors and timeouts. Retry-After in seconds can lengthen a wait up to 5 minutes; an HTTP-date Retry-After is ignored."
+          },
+          "default": {
+            "description": "Any other status, including a redirect, fails the delivery without a retry. Redirects are not followed."
+          },
+          "2XX": {
+            "description": "Delivered. Answer within 10 seconds and do the work afterwards."
+          },
+          "5XX": {
+            "description": "Retried up to 7 times over about 15 minutes with the same delivery_id, as are network errors and timeouts. Retry-After in seconds can lengthen a wait up to 5 minutes; an HTTP-date Retry-After is ignored."
+          }
+        },
+        "security": [
+          {
+            "pluginWebhookToken": []
+          }
+        ],
+        "summary": "Trail change closed",
+        "x-entire-experimental": true,
+        "x-entire-published": true
+      }
+    },
+    "trail.change.gates.updated": {
+      "post": {
+        "description": "A gate's status changed on a change's head commit. Sent only when the status changes. previous_status is null when there is no earlier result to compare. gates gives the overall state: every enabled gate on the change at head_sha. version orders a change's gate events, which can arrive out of order. Sent to plugins that subscribe to the `trail_change_gates` event group. A group can gain event types, so answer 2xx to an event type you do not handle.",
+        "operationId": "pluginWebhookTrailChangeGatesUpdated",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "User-Agent",
+            "required": true,
+            "schema": {
+              "enum": [
+                "Entire-Webhooks/1"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PluginWebhookTrailChangeGatesDelivery"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "429": {
+            "description": "Retried up to 7 times over about 15 minutes with the same delivery_id, as are network errors and timeouts. Retry-After in seconds can lengthen a wait up to 5 minutes; an HTTP-date Retry-After is ignored."
+          },
+          "default": {
+            "description": "Any other status, including a redirect, fails the delivery without a retry. Redirects are not followed."
+          },
+          "2XX": {
+            "description": "Delivered. Answer within 10 seconds and do the work afterwards."
+          },
+          "5XX": {
+            "description": "Retried up to 7 times over about 15 minutes with the same delivery_id, as are network errors and timeouts. Retry-After in seconds can lengthen a wait up to 5 minutes; an HTTP-date Retry-After is ignored."
+          }
+        },
+        "security": [
+          {
+            "pluginWebhookToken": []
+          }
+        ],
+        "summary": "Trail change gates updated",
+        "x-entire-experimental": true,
+        "x-entire-published": true
+      }
+    },
+    "trail.change.merged": {
+      "post": {
+        "description": "A change was merged into its base. Sent to plugins that subscribe to the `trail_change` event group. A group can gain event types, so answer 2xx to an event type you do not handle.",
+        "operationId": "pluginWebhookTrailChangeMerged",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "User-Agent",
+            "required": true,
+            "schema": {
+              "enum": [
+                "Entire-Webhooks/1"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PluginWebhookTrailChangeDelivery"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "429": {
+            "description": "Retried up to 7 times over about 15 minutes with the same delivery_id, as are network errors and timeouts. Retry-After in seconds can lengthen a wait up to 5 minutes; an HTTP-date Retry-After is ignored."
+          },
+          "default": {
+            "description": "Any other status, including a redirect, fails the delivery without a retry. Redirects are not followed."
+          },
+          "2XX": {
+            "description": "Delivered. Answer within 10 seconds and do the work afterwards."
+          },
+          "5XX": {
+            "description": "Retried up to 7 times over about 15 minutes with the same delivery_id, as are network errors and timeouts. Retry-After in seconds can lengthen a wait up to 5 minutes; an HTTP-date Retry-After is ignored."
+          }
+        },
+        "security": [
+          {
+            "pluginWebhookToken": []
+          }
+        ],
+        "summary": "Trail change merged",
+        "x-entire-experimental": true,
+        "x-entire-published": true
+      }
+    },
+    "trail.change.opened": {
+      "post": {
+        "description": "A change on a Trail was opened, as a draft or ready. Opening a change does not push a commit, so no ref event may follow. Sent to plugins that subscribe to the `trail_change` event group. A group can gain event types, so answer 2xx to an event type you do not handle.",
+        "operationId": "pluginWebhookTrailChangeOpened",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "User-Agent",
+            "required": true,
+            "schema": {
+              "enum": [
+                "Entire-Webhooks/1"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PluginWebhookTrailChangeDelivery"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "429": {
+            "description": "Retried up to 7 times over about 15 minutes with the same delivery_id, as are network errors and timeouts. Retry-After in seconds can lengthen a wait up to 5 minutes; an HTTP-date Retry-After is ignored."
+          },
+          "default": {
+            "description": "Any other status, including a redirect, fails the delivery without a retry. Redirects are not followed."
+          },
+          "2XX": {
+            "description": "Delivered. Answer within 10 seconds and do the work afterwards."
+          },
+          "5XX": {
+            "description": "Retried up to 7 times over about 15 minutes with the same delivery_id, as are network errors and timeouts. Retry-After in seconds can lengthen a wait up to 5 minutes; an HTTP-date Retry-After is ignored."
+          }
+        },
+        "security": [
+          {
+            "pluginWebhookToken": []
+          }
+        ],
+        "summary": "Trail change opened",
+        "x-entire-experimental": true,
+        "x-entire-published": true
+      }
+    },
+    "trail.change.reopened": {
+      "post": {
+        "description": "A closed change was opened again. Sent to plugins that subscribe to the `trail_change` event group. A group can gain event types, so answer 2xx to an event type you do not handle.",
+        "operationId": "pluginWebhookTrailChangeReopened",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "User-Agent",
+            "required": true,
+            "schema": {
+              "enum": [
+                "Entire-Webhooks/1"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PluginWebhookTrailChangeDelivery"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "429": {
+            "description": "Retried up to 7 times over about 15 minutes with the same delivery_id, as are network errors and timeouts. Retry-After in seconds can lengthen a wait up to 5 minutes; an HTTP-date Retry-After is ignored."
+          },
+          "default": {
+            "description": "Any other status, including a redirect, fails the delivery without a retry. Redirects are not followed."
+          },
+          "2XX": {
+            "description": "Delivered. Answer within 10 seconds and do the work afterwards."
+          },
+          "5XX": {
+            "description": "Retried up to 7 times over about 15 minutes with the same delivery_id, as are network errors and timeouts. Retry-After in seconds can lengthen a wait up to 5 minutes; an HTTP-date Retry-After is ignored."
+          }
+        },
+        "security": [
+          {
+            "pluginWebhookToken": []
+          }
+        ],
+        "summary": "Trail change reopened",
+        "x-entire-experimental": true,
+        "x-entire-published": true
+      }
+    },
+    "trail.change.updated": {
+      "post": {
+        "description": "An open or draft change changed its head commit, branch, base, title, or draft state. changed_fields names each field that changed. Sent to plugins that subscribe to the `trail_change` event group. A group can gain event types, so answer 2xx to an event type you do not handle.",
+        "operationId": "pluginWebhookTrailChangeUpdated",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "User-Agent",
+            "required": true,
+            "schema": {
+              "enum": [
+                "Entire-Webhooks/1"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PluginWebhookTrailChangeDelivery"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "429": {
+            "description": "Retried up to 7 times over about 15 minutes with the same delivery_id, as are network errors and timeouts. Retry-After in seconds can lengthen a wait up to 5 minutes; an HTTP-date Retry-After is ignored."
+          },
+          "default": {
+            "description": "Any other status, including a redirect, fails the delivery without a retry. Redirects are not followed."
+          },
+          "2XX": {
+            "description": "Delivered. Answer within 10 seconds and do the work afterwards."
+          },
+          "5XX": {
+            "description": "Retried up to 7 times over about 15 minutes with the same delivery_id, as are network errors and timeouts. Retry-After in seconds can lengthen a wait up to 5 minutes; an HTTP-date Retry-After is ignored."
+          }
+        },
+        "security": [
+          {
+            "pluginWebhookToken": []
+          }
+        ],
+        "summary": "Trail change updated",
+        "x-entire-experimental": true,
+        "x-entire-published": true
+      }
+    },
     "trail.closed": {
       "post": {
-        "description": "A trail was closed without a merge. Sent to plugins that subscribe to the `trail` event group. A group can gain event types, so answer 2xx to an event type you do not handle.",
+        "deprecated": true,
+        "description": "A trail was closed without a merge. Sent to plugins that subscribe to the `trail` event group. A group can gain event types, so answer 2xx to an event type you do not handle. Deprecated: subscribe to the `trail_change` event group and handle `trail.change.closed` instead. Entire stops sending this event on 2027-06-01.",
         "operationId": "pluginWebhookTrailClosed",
         "parameters": [
           {
@@ -58605,7 +58912,8 @@
     },
     "trail.gates.updated": {
       "post": {
-        "description": "A gate's status changed on a trail's head commit. Sent only when the status changes. previous_status is null when there is no earlier result to compare. gates gives the overall state: every enabled gate on the trail at head_sha. version orders a trail's gate events, which can arrive out of order. Sent to plugins that subscribe to the `trail_gates` event group. A group can gain event types, so answer 2xx to an event type you do not handle.",
+        "deprecated": true,
+        "description": "A gate's status changed on a trail's head commit. Sent only when the status changes. previous_status is null when there is no earlier result to compare. gates gives the overall state: every enabled gate on the trail at head_sha. version orders a trail's gate events, which can arrive out of order. Sent to plugins that subscribe to the `trail_gates` event group. A group can gain event types, so answer 2xx to an event type you do not handle. Deprecated: subscribe to the `trail_change_gates` event group and handle `trail.change.gates.updated` instead. Entire stops sending this event on 2027-06-01.",
         "operationId": "pluginWebhookTrailGatesUpdated",
         "parameters": [
           {
@@ -58656,7 +58964,8 @@
     },
     "trail.merged": {
       "post": {
-        "description": "A trail was merged into its base. Sent to plugins that subscribe to the `trail` event group. A group can gain event types, so answer 2xx to an event type you do not handle.",
+        "deprecated": true,
+        "description": "A trail was merged into its base. Sent to plugins that subscribe to the `trail` event group. A group can gain event types, so answer 2xx to an event type you do not handle. Deprecated: subscribe to the `trail_change` event group and handle `trail.change.merged` instead. Entire stops sending this event on 2027-06-01.",
         "operationId": "pluginWebhookTrailMerged",
         "parameters": [
           {
@@ -58707,7 +59016,8 @@
     },
     "trail.opened": {
       "post": {
-        "description": "A trail was opened, as a draft or ready. Opening a trail does not push a commit, so no ref event may follow. Sent to plugins that subscribe to the `trail` event group. A group can gain event types, so answer 2xx to an event type you do not handle.",
+        "deprecated": true,
+        "description": "A trail was opened, as a draft or ready. Opening a trail does not push a commit, so no ref event may follow. Sent to plugins that subscribe to the `trail` event group. A group can gain event types, so answer 2xx to an event type you do not handle. Deprecated: subscribe to the `trail_change` event group and handle `trail.change.opened` instead. Entire stops sending this event on 2027-06-01.",
         "operationId": "pluginWebhookTrailOpened",
         "parameters": [
           {
@@ -58758,7 +59068,8 @@
     },
     "trail.reopened": {
       "post": {
-        "description": "A closed trail was opened again. Sent to plugins that subscribe to the `trail` event group. A group can gain event types, so answer 2xx to an event type you do not handle.",
+        "deprecated": true,
+        "description": "A closed trail was opened again. Sent to plugins that subscribe to the `trail` event group. A group can gain event types, so answer 2xx to an event type you do not handle. Deprecated: subscribe to the `trail_change` event group and handle `trail.change.reopened` instead. Entire stops sending this event on 2027-06-01.",
         "operationId": "pluginWebhookTrailReopened",
         "parameters": [
           {
@@ -58809,7 +59120,8 @@
     },
     "trail.updated": {
       "post": {
-        "description": "An open or draft trail changed its head commit, branch, base, title, or draft state. changes names each field that changed. Sent to plugins that subscribe to the `trail` event group. A group can gain event types, so answer 2xx to an event type you do not handle.",
+        "deprecated": true,
+        "description": "An open or draft trail changed its head commit, branch, base, title, or draft state. changes names each field that changed. Sent to plugins that subscribe to the `trail` event group. A group can gain event types, so answer 2xx to an event type you do not handle. Deprecated: subscribe to the `trail_change` event group and handle `trail.change.updated` instead. Entire stops sending this event on 2027-06-01.",
         "operationId": "pluginWebhookTrailUpdated",
         "parameters": [
           {
@@ -63326,6 +63638,106 @@
         ],
         "type": "object"
       },
+      "PluginWebhookChange": {
+        "additionalProperties": true,
+        "properties": {
+          "author": {
+            "allOf": [
+              {
+                "description": "Null when Entire does not know who opened the change."
+              },
+              {
+                "$ref": "#/components/schemas/PluginWebhookTrailActor"
+              }
+            ]
+          },
+          "base": {
+            "description": "The branch the change merges into.",
+            "type": "string"
+          },
+          "branch": {
+            "description": "The branch the change tracks. Null once the change released its branch.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "created_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "head_sha": {
+            "description": "The commit Entire last recorded for the branch. Null until Entire records one.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "id": {
+            "description": "The change's id. It does not change.",
+            "type": "string"
+          },
+          "merged_at": {
+            "description": "Set on a merged change only.",
+            "format": "date-time",
+            "type": "string"
+          },
+          "number": {
+            "description": "The change's number in its repository.",
+            "format": "int64",
+            "type": "integer"
+          },
+          "state": {
+            "description": "draft, open, closed or merged.",
+            "enum": [
+              "draft",
+              "open",
+              "closed",
+              "merged"
+            ],
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "number",
+          "title",
+          "state",
+          "branch",
+          "base",
+          "head_sha",
+          "author",
+          "created_at",
+          "updated_at"
+        ],
+        "type": "object"
+      },
+      "PluginWebhookChangeRef": {
+        "additionalProperties": true,
+        "properties": {
+          "id": {
+            "description": "The change's id. It does not change.",
+            "type": "string"
+          },
+          "number": {
+            "description": "The change's number in its repository.",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "number"
+        ],
+        "type": "object"
+      },
       "PluginWebhookCommit": {
         "additionalProperties": true,
         "properties": {
@@ -63588,6 +64000,28 @@
         ],
         "type": "object"
       },
+      "PluginWebhookParentTrail": {
+        "additionalProperties": true,
+        "properties": {
+          "id": {
+            "description": "The Trail's id. It does not change.",
+            "type": "string"
+          },
+          "number": {
+            "description": "The Trail's number in its project.",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "number"
+        ],
+        "type": [
+          "object",
+          "null"
+        ]
+      },
       "PluginWebhookPusher": {
         "additionalProperties": true,
         "properties": {
@@ -63813,6 +64247,240 @@
         "required": [
           "from",
           "to"
+        ],
+        "type": "object"
+      },
+      "PluginWebhookTrailChangeDelivery": {
+        "additionalProperties": true,
+        "properties": {
+          "api_url": {
+            "description": "The delivering cell's Entire API, where this repository's check runs go.",
+            "type": "string"
+          },
+          "core_url": {
+            "description": "The delivering cell's Entire core.",
+            "type": "string"
+          },
+          "delivery_id": {
+            "description": "Unique to this delivery and the same across retries. A redelivery from the delivery log has a new one. Deduplicate on it.",
+            "type": "string"
+          },
+          "event": {
+            "$ref": "#/components/schemas/PluginWebhookTrailChangeEventBody"
+          },
+          "installation_id": {
+            "type": "string"
+          },
+          "plugin_id": {
+            "description": "Your plugin slug.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "delivery_id",
+          "plugin_id",
+          "installation_id",
+          "core_url",
+          "api_url",
+          "event"
+        ],
+        "type": "object"
+      },
+      "PluginWebhookTrailChangeEventBody": {
+        "additionalProperties": true,
+        "properties": {
+          "id": {
+            "description": "The same for every installation that receives this event, and for each redelivery of it.",
+            "type": "string"
+          },
+          "payload": {
+            "$ref": "#/components/schemas/PluginWebhookTrailChangePayload"
+          },
+          "time": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "type",
+          "time",
+          "payload"
+        ],
+        "type": "object"
+      },
+      "PluginWebhookTrailChangeGatesDelivery": {
+        "additionalProperties": true,
+        "properties": {
+          "api_url": {
+            "description": "The delivering cell's Entire API, where this repository's check runs go.",
+            "type": "string"
+          },
+          "core_url": {
+            "description": "The delivering cell's Entire core.",
+            "type": "string"
+          },
+          "delivery_id": {
+            "description": "Unique to this delivery and the same across retries. A redelivery from the delivery log has a new one. Deduplicate on it.",
+            "type": "string"
+          },
+          "event": {
+            "$ref": "#/components/schemas/PluginWebhookTrailChangeGatesEventBody"
+          },
+          "installation_id": {
+            "type": "string"
+          },
+          "plugin_id": {
+            "description": "Your plugin slug.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "delivery_id",
+          "plugin_id",
+          "installation_id",
+          "core_url",
+          "api_url",
+          "event"
+        ],
+        "type": "object"
+      },
+      "PluginWebhookTrailChangeGatesEventBody": {
+        "additionalProperties": true,
+        "properties": {
+          "id": {
+            "description": "The same for every installation that receives this event, and for each redelivery of it.",
+            "type": "string"
+          },
+          "payload": {
+            "$ref": "#/components/schemas/PluginWebhookTrailChangeGatesPayload"
+          },
+          "time": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "type",
+          "time",
+          "payload"
+        ],
+        "type": "object"
+      },
+      "PluginWebhookTrailChangeGatesPayload": {
+        "additionalProperties": true,
+        "properties": {
+          "change": {
+            "$ref": "#/components/schemas/PluginWebhookChangeRef"
+          },
+          "gate": {
+            "$ref": "#/components/schemas/PluginWebhookTrailGate"
+          },
+          "gates": {
+            "description": "Every enabled gate on the change at head_sha as of this event. pending means no result yet.",
+            "items": {
+              "$ref": "#/components/schemas/PluginWebhookTrailGateSummary"
+            },
+            "type": "array"
+          },
+          "head_sha": {
+            "description": "The commit the gate result is for. It can lag the change's current head while a result for an earlier push lands.",
+            "type": "string"
+          },
+          "repository": {
+            "$ref": "#/components/schemas/PluginWebhookTrailRepository"
+          },
+          "trail": {
+            "allOf": [
+              {
+                "description": "The Trail that holds the change. Null when Entire does not know it."
+              },
+              {
+                "$ref": "#/components/schemas/PluginWebhookParentTrail"
+              }
+            ]
+          },
+          "version": {
+            "description": "Orders this change's gate events. Higher is newer; deliveries can arrive out of order, so ignore one lower than the highest you have handled for this change.",
+            "format": "int64",
+            "minimum": 1,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "repository",
+          "trail",
+          "change",
+          "head_sha",
+          "version",
+          "gate",
+          "gates"
+        ],
+        "type": "object"
+      },
+      "PluginWebhookTrailChangePayload": {
+        "additionalProperties": true,
+        "properties": {
+          "actor": {
+            "allOf": [
+              {
+                "description": "Who made the change. For a push that moved head_sha, the account that pushed. Null when Entire does not know, such as for a change on the forge."
+              },
+              {
+                "$ref": "#/components/schemas/PluginWebhookTrailActor"
+              }
+            ]
+          },
+          "change": {
+            "$ref": "#/components/schemas/PluginWebhookChange"
+          },
+          "changed_fields": {
+            "allOf": [
+              {
+                "description": "The fields this event changed. Absent on trail.change.opened."
+              },
+              {
+                "$ref": "#/components/schemas/PluginWebhookTrailChanges"
+              }
+            ]
+          },
+          "commit": {
+            "allOf": [
+              {
+                "description": "The head_sha commit, when a push or the change opening set head_sha. Null otherwise."
+              },
+              {
+                "$ref": "#/components/schemas/PluginWebhookCommit"
+              }
+            ]
+          },
+          "repository": {
+            "$ref": "#/components/schemas/PluginWebhookTrailRepository"
+          },
+          "trail": {
+            "allOf": [
+              {
+                "description": "The Trail that holds the change. Null when Entire does not know it."
+              },
+              {
+                "$ref": "#/components/schemas/PluginWebhookParentTrail"
+              }
+            ]
+          }
+        },
+        "required": [
+          "repository",
+          "trail",
+          "change",
+          "actor",
+          "commit"
         ],
         "type": "object"
       },
@@ -64584,12 +65252,20 @@
             "type": "string"
           },
           "instructions": {
-            "description": "Review focus, rendered after the review contract's guidance.",
+            "description": "Review focus, rendered after the review contract's guidance; for a write agent, what it is told before each run's objective.",
             "type": "string"
           },
           "is_enabled": {
             "description": "Whether its trigger runs it; false while paused. Pause and resume change it. Manual runs ignore it.",
             "type": "boolean"
+          },
+          "mode": {
+            "description": "review: each run reviews its Change and reports findings and a signal. write: each run changes files, commits them and pushes to the Change's agent branch.",
+            "enum": [
+              "review",
+              "write"
+            ],
+            "type": "string"
           },
           "model": {
             "description": "Configured model id. Null preserves the model family's default selection; GET /agents/models lists each family's default model id.",
@@ -64668,7 +65344,7 @@
           "signal": {
             "allOf": [
               {
-                "description": "The agent's signal: each review distilled into one reading. It has no name of its own; a Change shows it under the agent's name."
+                "description": "The agent's signal: each review distilled into one reading. It has no name of its own; a Change shows it under the agent's name. A write agent shows as boolean, higher_is_better, though it stores none and reports no reading; a write may send that back or none."
               },
               {
                 "$ref": "#/components/schemas/AgentSignal"
@@ -64737,6 +65413,7 @@
           "reasoning_effort",
           "timeout_ms",
           "instructions",
+          "mode",
           "signal"
         ],
         "type": "object"
@@ -64899,6 +65576,14 @@
             "description": "On create, false or omitted creates the agent paused. On replace, omit it or send the current value; anything else is 422.",
             "type": "boolean"
           },
+          "mode": {
+            "description": "review (the default on a create; a replace that omits it keeps the agent's mode): the agent reviews. write: each run changes files for a launcher that names an objective (POST .../runs with write), and pushes them to the Change's agent branch; it takes no signal, no trigger and no preset, and runs only where Entire runs it.",
+            "enum": [
+              "review",
+              "write"
+            ],
+            "type": "string"
+          },
           "model": {
             "description": "Model id from GET /agents/models. With no harness on a hosted custom create, null or omission selects the Pi family default. With no harness on a replace, null or omission keeps the current selection. With legacy harness present, null or omission selects that family's default.",
             "maxLength": 128,
@@ -64958,7 +65643,7 @@
           "signal": {
             "allOf": [
               {
-                "description": "The signal each review reports with its findings: the review distilled into one reading. Required without a preset."
+                "description": "The signal each review reports with its findings: the review distilled into one reading. Required without a preset. A write agent takes none, or the pass/fail signal it is read with."
               },
               {
                 "$ref": "#/components/schemas/AgentSignalInput"
@@ -65001,7 +65686,15 @@
             "type": "string"
           },
           "instructions": {
-            "description": "Review focus, rendered after the review contract's guidance.",
+            "description": "Review focus, rendered after the review contract's guidance; for a write agent, what it is told before each run's objective.",
+            "type": "string"
+          },
+          "mode": {
+            "description": "review: each run reviews its Change and reports findings and a signal. write: each run changes files, commits them and pushes to the Change's agent branch.",
+            "enum": [
+              "review",
+              "write"
+            ],
             "type": "string"
           },
           "model": {
@@ -65025,7 +65718,7 @@
           "signal": {
             "allOf": [
               {
-                "description": "The agent's signal: each review distilled into one reading. It has no name of its own; a Change shows it under the agent's name."
+                "description": "The agent's signal: each review distilled into one reading. It has no name of its own; a Change shows it under the agent's name. A write agent shows as boolean, higher_is_better, though it stores none and reports no reading; a write may send that back or none."
               },
               {
                 "$ref": "#/components/schemas/AgentSignal"
@@ -65046,6 +65739,7 @@
           "reasoning_effort",
           "timeout_ms",
           "instructions",
+          "mode",
           "signal"
         ],
         "type": "object"
@@ -65271,12 +65965,20 @@
             "type": "string"
           },
           "instructions": {
-            "description": "Review focus, rendered after the review contract's guidance.",
+            "description": "Review focus, rendered after the review contract's guidance; for a write agent, what it is told before each run's objective.",
             "type": "string"
           },
           "is_enabled": {
             "description": "Whether its trigger runs it; false while paused. Pause and resume change it. Manual runs ignore it.",
             "type": "boolean"
+          },
+          "mode": {
+            "description": "review: each run reviews its Change and reports findings and a signal. write: each run changes files, commits them and pushes to the Change's agent branch.",
+            "enum": [
+              "review",
+              "write"
+            ],
+            "type": "string"
           },
           "model": {
             "description": "Configured model id. Null preserves the model family's default selection; GET /agents/models lists each family's default model id.",
@@ -65345,7 +66047,7 @@
           "signal": {
             "allOf": [
               {
-                "description": "The agent's signal: each review distilled into one reading. It has no name of its own; a Change shows it under the agent's name."
+                "description": "The agent's signal: each review distilled into one reading. It has no name of its own; a Change shows it under the agent's name. A write agent shows as boolean, higher_is_better, though it stores none and reports no reading; a write may send that back or none."
               },
               {
                 "$ref": "#/components/schemas/AgentSignal"
@@ -65413,6 +66115,7 @@
           "reasoning_effort",
           "timeout_ms",
           "instructions",
+          "mode",
           "signal"
         ],
         "type": "object"
@@ -65776,6 +66479,14 @@
             "description": "On create, false or omitted creates the agent paused. On replace, omit it or send the current value; anything else is 422.",
             "type": "boolean"
           },
+          "mode": {
+            "description": "review (the default on a create; a replace that omits it keeps the agent's mode): the agent reviews. write: each run changes files for a launcher that names an objective (POST .../runs with write), and pushes them to the Change's agent branch; it takes no signal, no trigger and no preset, and runs only where Entire runs it.",
+            "enum": [
+              "review",
+              "write"
+            ],
+            "type": "string"
+          },
           "model": {
             "description": "Model id from GET /agents/models. With no harness on a hosted custom create, null or omission selects the Pi family default. With no harness on a replace, null or omission keeps the current selection. With legacy harness present, null or omission selects that family's default.",
             "maxLength": 128,
@@ -65835,7 +66546,7 @@
           "signal": {
             "allOf": [
               {
-                "description": "The signal each review reports with its findings: the review distilled into one reading. Required without a preset."
+                "description": "The signal each review reports with its findings: the review distilled into one reading. Required without a preset. A write agent takes none, or the pass/fail signal it is read with."
               },
               {
                 "$ref": "#/components/schemas/AgentSignalInput"
@@ -66104,7 +66815,15 @@
             "type": "string"
           },
           "instructions": {
-            "description": "Review focus, rendered after the review contract's guidance.",
+            "description": "Review focus, rendered after the review contract's guidance; for a write agent, what it is told before each run's objective.",
+            "type": "string"
+          },
+          "mode": {
+            "description": "review: each run reviews its Change and reports findings and a signal. write: each run changes files, commits them and pushes to the Change's agent branch.",
+            "enum": [
+              "review",
+              "write"
+            ],
             "type": "string"
           },
           "model": {
@@ -66138,7 +66857,7 @@
           "signal": {
             "allOf": [
               {
-                "description": "The agent's signal: each review distilled into one reading. It has no name of its own; a Change shows it under the agent's name."
+                "description": "The agent's signal: each review distilled into one reading. It has no name of its own; a Change shows it under the agent's name. A write agent shows as boolean, higher_is_better, though it stores none and reports no reading; a write may send that back or none."
               },
               {
                 "$ref": "#/components/schemas/AgentSignal"
@@ -66182,6 +66901,7 @@
           "reasoning_effort",
           "timeout_ms",
           "instructions",
+          "mode",
           "signal"
         ],
         "type": "object"
@@ -69117,11 +69837,11 @@
         "additionalProperties": false,
         "properties": {
           "id": {
-            "description": "Full principal id: an account ULID, svc_<ULID> for a service account, or aut_<ULID> for an automation.",
+            "description": "Full principal id: an account ULID, svc_<ULID> for a service account, aut_<ULID> for an automation, or ins_<ULID> for a plugin installation.",
             "type": "string"
           },
           "kind": {
-            "description": "Open principal kind; currently account, service_account, or automation. Clients must tolerate future values.",
+            "description": "Open principal kind; currently account, service_account, or automation, and on a run also plugin_installation (a plugin installation that started it with agents:run). Clients must tolerate future values.",
             "type": "string"
           }
         },
@@ -78190,11 +78910,21 @@
             "type": "string"
           },
           "head_sha": {
-            "description": "Optional commit pin: the run is refused (409) if the Change's head is no longer this commit.",
+            "description": "Optional commit pin: the run is refused (409) if the Change's head is no longer this commit. Required with write: the commit the write run starts from.",
             "type": "string"
           },
           "target": {
             "$ref": "#/components/schemas/RunTargetInput"
+          },
+          "write": {
+            "allOf": [
+              {
+                "description": "Required to run an agent in the write mode, and refused for any other: what the run is to change. Its Change must be on a branch under entire/agent/ in a native Entire repository. The run's agent commits and pushes itself, starting from head_sha. Its token can push only branches under entire/agent/; the agent is instructed to push only the Change's branch, branch protection still applies, and entire-api does not judge the diff. The run's result is read from that branch."
+              },
+              {
+                "$ref": "#/components/schemas/RunWriteInput"
+              }
+            ]
           }
         },
         "required": [
@@ -79617,6 +80347,16 @@
               "self_hosted_runner"
             ],
             "type": "string"
+          },
+          "write_result": {
+            "allOf": [
+              {
+                "description": "What a write run left on its branch, once the run has read and stored it; null otherwise, and while the run is queued or running."
+              },
+              {
+                "$ref": "#/components/schemas/RunWriteResult"
+              }
+            ]
           }
         },
         "required": [
@@ -79640,6 +80380,7 @@
           "result",
           "mode",
           "review_changes_result",
+          "write_result",
           "output",
           "usage_by_model",
           "events",
@@ -79707,11 +80448,21 @@
             "type": "string"
           },
           "head_sha": {
-            "description": "Optional commit pin: the run is refused (409) if the Change's head is no longer this commit.",
+            "description": "Optional commit pin: the run is refused (409) if the Change's head is no longer this commit. Required with write: the commit the write run starts from.",
             "type": "string"
           },
           "target": {
             "$ref": "#/components/schemas/RunTargetInput"
+          },
+          "write": {
+            "allOf": [
+              {
+                "description": "Required to run an agent in the write mode, and refused for any other: what the run is to change. Its Change must be on a branch under entire/agent/ in a native Entire repository. The run's agent commits and pushes itself, starting from head_sha. Its token can push only branches under entire/agent/; the agent is instructed to push only the Change's branch, branch protection still applies, and entire-api does not judge the diff. The run's result is read from that branch."
+              },
+              {
+                "$ref": "#/components/schemas/RunWriteInput"
+              }
+            ]
           }
         },
         "required": [
@@ -80135,29 +80886,41 @@
           },
           "kind": {
             "enum": [
-              "review"
+              "review",
+              "write"
             ],
             "type": "string"
           },
           "output_mode": {
+            "description": "Null for a write run, which is given no output schema.",
             "enum": [
               "claude_json_schema",
               "codex_output_schema",
               "pi_prompted_json"
             ],
-            "type": "string"
+            "type": [
+              "string",
+              "null"
+            ]
           },
           "output_schema_sha256": {
-            "description": "SHA-256 of the exact output schema the harness was given (full schema in the snapshot).",
+            "description": "SHA-256 of the exact output schema the harness was given (full schema in the snapshot); empty for a write run.",
             "type": "string"
           },
           "reviewed": {
-            "$ref": "#/components/schemas/RunModeCommits"
+            "allOf": [
+              {
+                "description": "The commits a review run reviewed; null for a write run."
+              },
+              {
+                "$ref": "#/components/schemas/RunModeCommits"
+              }
+            ]
           },
           "signal": {
             "allOf": [
               {
-                "description": "The signal descriptor the run reports, as the run pinned it."
+                "description": "The signal descriptor the run reports, as the run pinned it. A write run shows as boolean, higher_is_better, and reports no reading."
               },
               {
                 "$ref": "#/components/schemas/AgentSignal"
@@ -80811,6 +81574,76 @@
         "required": [
           "id",
           "version"
+        ],
+        "type": "object"
+      },
+      "RunWriteInput": {
+        "additionalProperties": false,
+        "properties": {
+          "objective": {
+            "description": "What the run is to do, in the agent's prompt as given. Entire does not read it.",
+            "maxLength": 32768,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "objective"
+        ],
+        "type": "object"
+      },
+      "RunWriteResult": {
+        "additionalProperties": false,
+        "properties": {
+          "head_sha": {
+            "description": "The branch's tip when it was read; null when failed.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "outcome": {
+            "description": "committed: the branch's tip is no longer the commit the run started from (head_sha). no_change: it still is. failed: the branch had no tip to read (reason).",
+            "enum": [
+              "committed",
+              "no_change",
+              "failed"
+            ],
+            "type": "string"
+          },
+          "paths": {
+            "description": "The files that differ between start_sha and head_sha. Empty unless committed.",
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "paths_truncated": {
+            "description": "True when the repository stopped listing changed files early, so paths is a prefix of them.",
+            "type": "boolean"
+          },
+          "reason": {
+            "description": "A fixed code for failed: branch_missing. Null otherwise.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "start_sha": {
+            "description": "The commit the run started from.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "outcome",
+          "start_sha",
+          "head_sha",
+          "paths",
+          "paths_truncated",
+          "reason"
         ],
         "type": "object"
       },
