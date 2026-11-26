@@ -23232,7 +23232,7 @@
     },
     "/repos/{repo_id}/changes/{number}/update-branch": {
       "post": {
-        "description": "Updates an open Entire-native Trail branch by merging its base branch into it through the repository's native git storage. Both branch tips are fenced at their resolved SHAs, so a concurrent push is rejected rather than silently included; content conflicts leave the branch unchanged and must be resolved manually.",
+        "description": "Updates a Trail branch by merging its base branch into it. Native repositories need write access and an open Trail, and merge in repository storage with both tips fenced at their resolved SHAs. GitHub-backed repositories need only read access because the merge runs on GitHub as the caller; the new head arrives through the mirror sync. Content conflicts leave the branch unchanged and must be resolved manually.",
         "operationId": "changesUpdateBranchByRepoID",
         "parameters": [
           {
@@ -23379,7 +23379,7 @@
             "bearerAuth": []
           }
         ],
-        "summary": "Update an Entire-native Change branch from its base",
+        "summary": "Update a Change branch from its base",
         "tags": [
           "trails"
         ]
@@ -41161,7 +41161,7 @@
     "/repos/{repo_id}/trails/{number}/update-branch": {
       "post": {
         "deprecated": true,
-        "description": "Updates an open Entire-native Trail branch by merging its base branch into it through the repository's native git storage. Both branch tips are fenced at their resolved SHAs, so a concurrent push is rejected rather than silently included; content conflicts leave the branch unchanged and must be resolved manually.",
+        "description": "Updates a Trail branch by merging its base branch into it. Native repositories need write access and an open Trail, and merge in repository storage with both tips fenced at their resolved SHAs. GitHub-backed repositories need only read access because the merge runs on GitHub as the caller; the new head arrives through the mirror sync. Content conflicts leave the branch unchanged and must be resolved manually.",
         "operationId": "trailsUpdateBranchByRepoID",
         "parameters": [
           {
@@ -41308,7 +41308,7 @@
             "bearerAuth": []
           }
         ],
-        "summary": "Update an Entire-native Trail branch from its base",
+        "summary": "Update a Trail branch from its base",
         "tags": [
           "trails"
         ]
@@ -65310,6 +65310,13 @@
             "description": "Owning project id (ULID).",
             "type": "string"
           },
+          "provider": {
+            "description": "Provider the agent's model runs on, saved when picked on purpose, such as sarvam. Null follows the cell's routing.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
           "reasoning_effort": {
             "description": "Reasoning effort the agent runs at. Null when its model takes none, or for a version saved before efforts were stored, which runs at the harness default.",
             "type": [
@@ -65410,6 +65417,7 @@
           "description",
           "harness",
           "model",
+          "provider",
           "reasoning_effort",
           "timeout_ms",
           "instructions",
@@ -65607,6 +65615,15 @@
               "null"
             ]
           },
+          "provider": {
+            "description": "Provider for the model, from the row GET /agents/models lists it on. Omit or send null for the cell's routing. Pi only. A hosted model-only replace that keeps the current model selection also keeps its saved provider when provider is omitted or null.",
+            "maxLength": 64,
+            "minLength": 1,
+            "type": [
+              "string",
+              "null"
+            ]
+          },
           "reasoning_effort": {
             "description": "Reasoning effort: one of the reasoning_efforts GET /agents/models lists for the model the agent runs (the harness default model when model is null). Any other value returns 422. Omit or send null to use the family's default_reasoning_effort (or none if the model takes none). A hosted model-only replace keeping the current model selection also keeps its explicit saved effort when effort is omitted or null.",
             "enum": [
@@ -65708,6 +65725,13 @@
             "description": "Display name, unique among the project's active agents (ignoring case). A preset agent's is its preset's.",
             "type": "string"
           },
+          "provider": {
+            "description": "Provider the agent's model runs on, saved when picked on purpose, such as sarvam. Null follows the cell's routing.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
           "reasoning_effort": {
             "description": "Reasoning effort the agent runs at. Null when its model takes none, or for a version saved before efforts were stored, which runs at the harness default.",
             "type": [
@@ -65736,6 +65760,7 @@
           "description",
           "harness",
           "model",
+          "provider",
           "reasoning_effort",
           "timeout_ms",
           "instructions",
@@ -66023,6 +66048,13 @@
             "description": "Owning project id (ULID).",
             "type": "string"
           },
+          "provider": {
+            "description": "Provider the agent's model runs on, saved when picked on purpose, such as sarvam. Null follows the cell's routing.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
           "reasoning_effort": {
             "description": "Reasoning effort the agent runs at. Null when its model takes none, or for a version saved before efforts were stored, which runs at the harness default.",
             "type": [
@@ -66112,6 +66144,7 @@
           "description",
           "harness",
           "model",
+          "provider",
           "reasoning_effort",
           "timeout_ms",
           "instructions",
@@ -66134,6 +66167,13 @@
           "preview": {
             "description": "True for a model in preview. Saving an agent with it and running it do not depend on any flag.",
             "type": "boolean"
+          },
+          "provider": {
+            "description": "Provider an agent saves with this model to run it on this row's provider, such as sarvam; null for the cell's own choice. A model can be listed once per provider.",
+            "type": [
+              "string",
+              "null"
+            ]
           },
           "publisher": {
             "description": "Company that made the model.",
@@ -66170,6 +66210,7 @@
         },
         "required": [
           "id",
+          "provider",
           "name",
           "publisher",
           "visibility",
@@ -66206,6 +66247,13 @@
             "description": "Display name of the company that serves the model, which can differ from the harness provider: a pi model on the Sarvam route is served by Sarvam.",
             "type": "string"
           },
+          "provider_id": {
+            "description": "The model list's provider for this row: what an agent saves to run on it; null for the cell's own choice.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
           "usd_per_million_tokens": {
             "allOf": [
               {
@@ -66219,6 +66267,7 @@
         },
         "required": [
           "id",
+          "provider_id",
           "provider",
           "usd_per_million_tokens"
         ],
@@ -66503,6 +66552,15 @@
           },
           "preset": {
             "description": "Run an Entire preset (GET /agents/presets) as it is now: its name, description, model, instructions and signal are the preset's, on every read and run. Send null or omit it for a custom agent. One active agent per preset per project.",
+            "maxLength": 64,
+            "minLength": 1,
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "provider": {
+            "description": "Provider for the model, from the row GET /agents/models lists it on. Omit or send null for the cell's routing. Pi only. A hosted model-only replace that keeps the current model selection also keeps its saved provider when provider is omitted or null.",
             "maxLength": 64,
             "minLength": 1,
             "type": [
@@ -66847,6 +66905,13 @@
               }
             ]
           },
+          "provider": {
+            "description": "Provider the agent's model runs on, saved when picked on purpose, such as sarvam. Null follows the cell's routing.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
           "reasoning_effort": {
             "description": "Reasoning effort the agent runs at. Null when its model takes none, or for a version saved before efforts were stored, which runs at the harness default.",
             "type": [
@@ -66898,6 +66963,7 @@
           "description",
           "harness",
           "model",
+          "provider",
           "reasoning_effort",
           "timeout_ms",
           "instructions",
@@ -80111,7 +80177,7 @@
             "type": "string"
           },
           "base_sha": {
-            "pattern": "^[a-fA-F0-9]{40}$",
+            "pattern": "^(?:[a-fA-F0-9]{40}|[a-fA-F0-9]{64})$",
             "type": [
               "string",
               "null"
@@ -80122,7 +80188,7 @@
             "type": "string"
           },
           "head_sha": {
-            "pattern": "^[a-fA-F0-9]{40}$",
+            "pattern": "^(?:[a-fA-F0-9]{40}|[a-fA-F0-9]{64})$",
             "type": [
               "string",
               "null"
@@ -80238,6 +80304,13 @@
             },
             "type": [
               "array",
+              "null"
+            ]
+          },
+          "failure_detail": {
+            "description": "Credential-redacted error text the provider or agent process reported for a failed run; null when none was captured. Returned under the same access as diagnostic.",
+            "type": [
+              "string",
               "null"
             ]
           },
@@ -80366,6 +80439,7 @@
           "status",
           "error",
           "diagnostic",
+          "failure_detail",
           "billing_subject",
           "agent",
           "environment",
@@ -80588,7 +80662,7 @@
         "additionalProperties": false,
         "properties": {
           "code": {
-            "description": "Set when the run was refused for billing: billing_trial_ended, billing_credit_exhausted, billing_over_limit, billing_blocked, billing_not_enrolled or billing_no_paid_balance; null otherwise.",
+            "description": "Set when the run was refused for billing (billing_trial_ended, billing_credit_exhausted, billing_over_limit, billing_blocked, billing_not_enrolled or billing_no_paid_balance) or failed on the repository's own model key (llm_key_quota_exhausted or llm_key_rejected); null otherwise.",
             "type": [
               "string",
               "null"
@@ -80757,7 +80831,7 @@
             "type": "string"
           },
           "errorCode": {
-            "description": "Set when the run was refused for billing: billing_trial_ended, billing_credit_exhausted, billing_over_limit, billing_blocked, billing_not_enrolled or billing_no_paid_balance.",
+            "description": "Set when the run was refused for billing (billing_trial_ended, billing_credit_exhausted, billing_over_limit, billing_blocked, billing_not_enrolled or billing_no_paid_balance) or failed on the repository's own model key (llm_key_quota_exhausted or llm_key_rejected).",
             "type": [
               "string",
               "null"

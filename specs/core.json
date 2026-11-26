@@ -3504,6 +3504,35 @@
         ],
         "type": "object"
       },
+      "ListManagedPluginInstallationsOutputBody": {
+        "additionalProperties": true,
+        "properties": {
+          "$schema": {
+            "description": "A URL to the JSON Schema for this object.",
+            "examples": [
+              "/api/v1/schemas/ListManagedPluginInstallationsOutputBody.json"
+            ],
+            "format": "uri",
+            "readOnly": true,
+            "type": "string"
+          },
+          "items": {
+            "description": "Installations by plugin name, ignoring case, then installation id",
+            "items": {
+              "$ref": "#/components/schemas/ProjectPluginInstallation"
+            },
+            "type": "array"
+          },
+          "next_cursor": {
+            "description": "Present when more installations remain",
+            "type": "string"
+          }
+        },
+        "required": [
+          "items"
+        ],
+        "type": "object"
+      },
       "ListMeInvitationsOutputBody": {
         "additionalProperties": true,
         "properties": {
@@ -3914,7 +3943,7 @@
             "type": "string"
           },
           "plugins": {
-            "description": "Plugins in display order",
+            "description": "Plugins in display order: by name, ignoring case, then slug",
             "items": {
               "$ref": "#/components/schemas/Plugin"
             },
@@ -5513,9 +5542,15 @@
             "description": "The only project that can install the plugin. Absent when any project can",
             "type": "string"
           },
-          "listed": {
-            "description": "True when the plugin shows in every project's catalog",
-            "type": "boolean"
+          "listing": {
+            "description": "Platform-managed catalog level",
+            "enum": [
+              "unlisted",
+              "listed",
+              "featured"
+            ],
+            "type": "string",
+            "x-open-enum": true
           },
           "logo_dark_url": {
             "description": "Logo URL for dark backgrounds, as logo_url. Absent uses logo_url",
@@ -5556,7 +5591,7 @@
           "logo_url",
           "install_levels",
           "permissions",
-          "listed"
+          "listing"
         ],
         "type": "object"
       },
@@ -6031,9 +6066,15 @@
             "description": "HTTPS URL serving the keys that sign the plugin's tokens. Core fetches a new value before saving it.",
             "type": "string"
           },
-          "listed": {
-            "description": "Shows the plugin in every project's catalog. Requires installable_by any. An unlisted plugin installs through its own install link.",
-            "type": "boolean"
+          "listing": {
+            "description": "Platform-managed catalog level. Requires installable_by any unless unlisted.",
+            "enum": [
+              "unlisted",
+              "listed",
+              "featured"
+            ],
+            "type": "string",
+            "x-open-enum": true
           },
           "logo_dark_url": {
             "description": "Logo for dark backgrounds, as logo_url. A replace that omits it keeps the stored one. Empty shows logo_url on dark.",
@@ -6107,7 +6148,7 @@
         },
         "required": [
           "id",
-          "listed",
+          "listing",
           "slug",
           "permissions",
           "name",
@@ -19607,6 +19648,163 @@
         ]
       }
     },
+    "/plugin-installations": {
+      "get": {
+        "description": "Covers each project where the caller holds project#manage, and each GitHub-sourced project whose namespace the caller administers. The namespace check can be up to an hour old, so a former admin can still list those installations for that long. Deleting installations are never listed. Installations are ordered by plugin name, ignoring case, then installation id. An unknown plugin slug lists nothing.",
+        "operationId": "listManagedPluginInstallations",
+        "parameters": [
+          {
+            "description": "Only installations in this state",
+            "explode": false,
+            "in": "query",
+            "name": "lifecycle_state",
+            "schema": {
+              "description": "Only installations in this state",
+              "enum": [
+                "active",
+                "suspended"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Only installations of the plugin with this slug",
+            "explode": false,
+            "in": "query",
+            "name": "plugin",
+            "schema": {
+              "description": "Only installations of the plugin with this slug",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Literal case-insensitive substring match on the plugin name",
+            "explode": false,
+            "in": "query",
+            "name": "q",
+            "schema": {
+              "description": "Literal case-insensitive substring match on the plugin name",
+              "maxLength": 200,
+              "type": "string"
+            }
+          },
+          {
+            "description": "Opaque cursor from a previous response's next_cursor. It holds the filters, so repeat them unchanged",
+            "explode": false,
+            "in": "query",
+            "name": "cursor",
+            "schema": {
+              "description": "Opaque cursor from a previous response's next_cursor. It holds the filters, so repeat them unchanged",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Installations per page",
+            "explode": false,
+            "in": "query",
+            "name": "per_page",
+            "schema": {
+              "default": 30,
+              "description": "Installations per page",
+              "format": "int64",
+              "maximum": 100,
+              "minimum": 1,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListManagedPluginInstallationsOutputBody"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "422": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          },
+          "503": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "security": [
+          {
+            "oauth2": []
+          },
+          {
+            "oidc": []
+          },
+          {
+            "bearerAuth": []
+          },
+          {
+            "sessionAuth": []
+          }
+        ],
+        "summary": "List the plugin installations in every project the caller manages",
+        "tags": [
+          "plugins"
+        ]
+      }
+    },
     "/plugin-permissions": {
       "get": {
         "description": "Any signed-in account can read it.",
@@ -19685,28 +19883,38 @@
     },
     "/plugin-registrations": {
       "get": {
-        "description": "Requires project#manage on project_id.",
+        "description": "With project_id, requires project#manage on it. Without one, lists the plugins of every project where the caller holds project#manage. Plugins are ordered by name, ignoring case, then slug.",
         "operationId": "listPluginRegistrations",
         "parameters": [
           {
-            "description": "Project that owns the plugins. Needs manage permission on the project",
+            "description": "Only plugins this project owns. Needs manage permission on the project. Omitted, every project the caller manages",
             "explode": false,
             "in": "query",
             "name": "project_id",
-            "required": true,
             "schema": {
-              "description": "Project that owns the plugins. Needs manage permission on the project",
+              "description": "Only plugins this project owns. Needs manage permission on the project. Omitted, every project the caller manages",
               "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$",
               "type": "string"
             }
           },
           {
-            "description": "Opaque cursor from a previous response's next_cursor",
+            "description": "Literal case-insensitive substring match on the plugin name",
+            "explode": false,
+            "in": "query",
+            "name": "q",
+            "schema": {
+              "description": "Literal case-insensitive substring match on the plugin name",
+              "maxLength": 200,
+              "type": "string"
+            }
+          },
+          {
+            "description": "Opaque cursor from a previous response's next_cursor. It holds the filters, so repeat them unchanged",
             "explode": false,
             "in": "query",
             "name": "cursor",
             "schema": {
-              "description": "Opaque cursor from a previous response's next_cursor",
+              "description": "Opaque cursor from a previous response's next_cursor. It holds the filters, so repeat them unchanged",
               "type": "string"
             }
           },
@@ -19811,13 +20019,13 @@
             "sessionAuth": []
           }
         ],
-        "summary": "List the plugins a project owns, with every setting",
+        "summary": "List the plugins the caller's projects own, with every setting",
         "tags": [
           "plugins"
         ]
       },
       "post": {
-        "description": "Requires project#manage on owner_project_id. Any other caller gets 404, as for a project that does not exist. owner_project_id must name a native Entire project; a mirrored project is refused with owner_project_not_native. The plugin starts unlisted. A project owns at most 100 plugins; more is refused with plugin_limit_reached. A project whose owning account has requested deletion is refused with owner_deletion_pending. Entire sets listed and repo_create_daily_limit; the plugin's owner reads them. Core fetches a jwks_url once before saving it. event_groups names groups from GET /api/v1/plugin-permissions, and the permissions must admit each one. A create that omits it receives installation events only. A replace that omits it keeps the stored groups the new permissions admit. An empty list receives installation events only, which every plugin receives. A save can keep a deprecated group that the plugin holds, but no save can add one. A group can gain event types, so a webhook answers 2xx to a type it does not handle. logo_url and a non-empty logo_dark_url must name an image the caller uploaded with an entire.com session to PUT /api/v1/plugin-images on the web app origin; a replace may also keep the plugin's current logo. A save that sets a new upload publishes it, and a replace deletes each uploaded logo it no longer names. An expired upload is refused with logo_upload_expired. A create whose logo is refused still creates the plugin, without a published logo.",
+        "description": "Requires project#manage on owner_project_id. Any other caller gets 404, as for a project that does not exist. owner_project_id must name a native Entire project; a mirrored project is refused with owner_project_not_native. The plugin starts unlisted. A project owns at most 100 plugins; more is refused with plugin_limit_reached. A project whose owning account has requested deletion is refused with owner_deletion_pending. Entire sets the listing level and repo_create_daily_limit; the plugin's owner reads them. Core fetches a jwks_url once before saving it. event_groups names groups from GET /api/v1/plugin-permissions, and the permissions must admit each one. A create that omits it receives installation events only. A replace that omits it keeps the stored groups the new permissions admit. An empty list receives installation events only, which every plugin receives. A save can keep a deprecated group that the plugin holds, but no save can add one. A group can gain event types, so a webhook answers 2xx to a type it does not handle. logo_url and a non-empty logo_dark_url must name an image the caller uploaded with an entire.com session to PUT /api/v1/plugin-images on the web app origin; a replace may also keep the plugin's current logo. A save that sets a new upload publishes it, and a replace deletes each uploaded logo it no longer names. An expired upload is refused with logo_upload_expired. A create whose logo is refused still creates the plugin, without a published logo.",
         "operationId": "createPluginRegistration",
         "requestBody": {
           "content": {
@@ -20170,7 +20378,7 @@
         ]
       },
       "put": {
-        "description": "Requires project#manage on the plugin's owner project. Any other caller gets 404. Full replace of the owner settings. The slug and owner_project_id cannot change. Entire sets listed and repo_create_daily_limit; the plugin's owner reads them. Core fetches a changed jwks_url once before saving it. event_groups names groups from GET /api/v1/plugin-permissions, and the permissions must admit each one. A create that omits it receives installation events only. A replace that omits it keeps the stored groups the new permissions admit. An empty list receives installation events only, which every plugin receives. A save can keep a deprecated group that the plugin holds, but no save can add one. A group can gain event types, so a webhook answers 2xx to a type it does not handle. logo_url and a non-empty logo_dark_url must name an image the caller uploaded with an entire.com session to PUT /api/v1/plugin-images on the web app origin; a replace may also keep the plugin's current logo. A save that sets a new upload publishes it, and a replace deletes each uploaded logo it no longer names. An expired upload is refused with logo_upload_expired. ",
+        "description": "Requires project#manage on the plugin's owner project. Any other caller gets 404. Full replace of the owner settings. The slug and owner_project_id cannot change. Entire sets the listing level and repo_create_daily_limit; the plugin's owner reads them. Core fetches a changed jwks_url once before saving it. event_groups names groups from GET /api/v1/plugin-permissions, and the permissions must admit each one. A create that omits it receives installation events only. A replace that omits it keeps the stored groups the new permissions admit. An empty list receives installation events only, which every plugin receives. A save can keep a deprecated group that the plugin holds, but no save can add one. A group can gain event types, so a webhook answers 2xx to a type it does not handle. logo_url and a non-empty logo_dark_url must name an image the caller uploaded with an entire.com session to PUT /api/v1/plugin-images on the web app origin; a replace may also keep the plugin's current logo. A save that sets a new upload publishes it, and a replace deletes each uploaded logo it no longer names. An expired upload is refused with logo_upload_expired. ",
         "operationId": "replacePluginRegistration",
         "parameters": [
           {
@@ -20323,12 +20531,38 @@
             }
           },
           {
-            "description": "Opaque cursor from a previous response's next_cursor",
+            "description": "Literal case-insensitive substring match on the plugin name",
+            "explode": false,
+            "in": "query",
+            "name": "q",
+            "schema": {
+              "description": "Literal case-insensitive substring match on the plugin name",
+              "maxLength": 200,
+              "type": "string"
+            }
+          },
+          {
+            "description": "Only plugins at this catalog level",
+            "explode": false,
+            "in": "query",
+            "name": "listing",
+            "schema": {
+              "description": "Only plugins at this catalog level",
+              "enum": [
+                "unlisted",
+                "listed",
+                "featured"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Opaque cursor from a previous response's next_cursor. It holds the filters, so repeat them unchanged",
             "explode": false,
             "in": "query",
             "name": "cursor",
             "schema": {
-              "description": "Opaque cursor from a previous response's next_cursor",
+              "description": "Opaque cursor from a previous response's next_cursor. It holds the filters, so repeat them unchanged",
               "type": "string"
             }
           },
