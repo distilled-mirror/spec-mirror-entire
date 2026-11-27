@@ -6929,6 +6929,16 @@
           },
           "onboardable": {
             "type": "boolean"
+          },
+          "provider_repo_id": {
+            "type": "string"
+          },
+          "visibility": {
+            "enum": [
+              "public",
+              "private"
+            ],
+            "type": "string"
           }
         },
         "required": [
@@ -7324,6 +7334,28 @@
         ],
         "type": "object"
       },
+      "RepoProviderRepo": {
+        "additionalProperties": true,
+        "properties": {
+          "id": {
+            "description": "The provider's repository ID.",
+            "type": "string"
+          },
+          "visibility": {
+            "description": "The provider's visibility for the repository.",
+            "enum": [
+              "public",
+              "private"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "visibility"
+        ],
+        "type": "object"
+      },
       "RepoReference": {
         "additionalProperties": true,
         "properties": {
@@ -7375,6 +7407,10 @@
               "entire"
             ],
             "type": "string"
+          },
+          "provider_repo": {
+            "$ref": "#/components/schemas/RepoProviderRepo",
+            "description": "The provider's facts for a repository that the caller can see at the provider but cannot reach in Entire. Set only with provider_access fresh and status unavailable."
           },
           "repoGroupId": {
             "type": "string"
@@ -7515,6 +7551,11 @@
           },
           "commitToken": {
             "pattern": "^$|^[A-Za-z0-9_-]{60,512}$",
+            "type": "string"
+          },
+          "provider_access": {
+            "description": "Source of provider visibility: cached (default) or fresh. fresh makes one live provider read, requires exactly one repository, and is rate limited per caller. Under fresh, a no-mirror result carries provider_repo_id in candidate, and an unavailable result for an onboarded repository can carry provider_repo. A no-mirror result without provider_repo_id means core did not honour fresh.",
+            "pattern": "^(cached|fresh)?$",
             "type": "string"
           },
           "recheckDeniedPermissions": {
@@ -17447,7 +17488,7 @@
     },
     "/orgs/{orgId}/teams/{team_id}/members/{account_id}": {
       "delete": {
-        "description": "Requires organization management permission. The removal is idempotent and answers 204. A team that directory sync owns is read-only here: the write answers 409 with type https://entire.com/errors/team/directory-managed.",
+        "description": "Requires organization management permission. An account that is not on the team answers 404. A team that directory sync owns is read-only here: the write answers 409 with type https://entire.com/errors/team/directory-managed.",
         "operationId": "removeTeamMember",
         "parameters": [
           {
@@ -26139,6 +26180,7 @@
     },
     "/repos/resolve": {
       "post": {
+        "description": "Set provider_access to fresh to read one GitHub repository live. A fresh request that exceeds the per-caller limit returns 429 with Retry-After.",
         "operationId": "resolveRepos",
         "requestBody": {
           "content": {
@@ -26200,6 +26242,16 @@
               }
             },
             "description": "Unprocessable Entity"
+          },
+          "429": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Too Many Requests"
           },
           "500": {
             "content": {
@@ -30418,7 +30470,7 @@
     },
     "/service-accounts/{accountId}/bindings/{bindingId}": {
       "delete": {
-        "description": "**Accepted credentials:** User token.\n\nRemoves an OIDC binding. Deleting a binding that does not exist returns 204.",
+        "description": "**Accepted credentials:** User token.\n\nRemoves an OIDC binding. A binding that does not exist answers 404.",
         "operationId": "deleteBinding",
         "parameters": [
           {
@@ -31290,7 +31342,7 @@
     },
     "/service-accounts/{accountId}/secrets/{secret_id}": {
       "delete": {
-        "description": "**Accepted credentials:** User token.\n\nRevokes one secret. Access tokens already issued from the secret stay valid until they expire. Deleting a secret that does not exist returns 204. A request to a region other than the service account's home region returns 421 with the home region's URL.",
+        "description": "**Accepted credentials:** User token.\n\nRevokes one secret. Access tokens already issued from the secret stay valid until they expire. A secret that does not exist answers 404. A request to a region other than the service account's home region returns 421 with the home region's URL.",
         "operationId": "deleteServiceAccountSecret",
         "parameters": [
           {
