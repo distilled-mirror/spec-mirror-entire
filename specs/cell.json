@@ -7695,6 +7695,64 @@
       "x-upstream": "brainstore"
     },
     "/repos/{repo_id}/brain/memories/{fact_id}": {
+      "get": {
+        "operationId": "getMemory",
+        "summary": "Read one memory by fact id",
+        "description": "Returns one read-model row in any status — superseded and retracted included, so a client can follow supersededBy hop by hop to the active head of an edit chain (e.g. after a 409 on editMemory) without paging the list. Requires repo read access.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/RepoID"
+          },
+          {
+            "$ref": "#/components/parameters/FactID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The memory",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemoryItem"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid repo id or fact id",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/MemoryNotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/Internal"
+          },
+          "503": {
+            "$ref": "#/components/responses/Unavailable"
+          }
+        },
+        "tags": [
+          "brainstore"
+        ]
+      },
       "patch": {
         "operationId": "editMemory",
         "summary": "Replace a memory's statement with a successor fact",
@@ -8494,12 +8552,12 @@
         "operationId": "agentModelsList",
         "parameters": [
           {
-            "description": "Project ULID the models are for, in either case. Models only some projects may use are listed only for such a project the caller can view.",
+            "description": "Project ULID the models are for, in either case. Models only some projects may use are listed only for such a project the caller can inspect.",
             "explode": false,
             "in": "query",
             "name": "project_id",
             "schema": {
-              "description": "Project ULID the models are for, in either case. Models only some projects may use are listed only for such a project the caller can view.",
+              "description": "Project ULID the models are for, in either case. Models only some projects may use are listed only for such a project the caller can inspect.",
               "pattern": "^[0-7][0-9A-HJKMNP-TV-Za-hjkmnp-tv-z]{25}$",
               "type": "string"
             }
@@ -8611,12 +8669,12 @@
         "operationId": "agentModelPricesList",
         "parameters": [
           {
-            "description": "Project ULID the models are for, in either case. Models only some projects may use are listed only for such a project the caller can view.",
+            "description": "Project ULID the models are for, in either case. Models only some projects may use are listed only for such a project the caller can inspect.",
             "explode": false,
             "in": "query",
             "name": "project_id",
             "schema": {
-              "description": "Project ULID the models are for, in either case. Models only some projects may use are listed only for such a project the caller can view.",
+              "description": "Project ULID the models are for, in either case. Models only some projects may use are listed only for such a project the caller can inspect.",
               "pattern": "^[0-7][0-9A-HJKMNP-TV-Za-hjkmnp-tv-z]{25}$",
               "type": "string"
             }
@@ -23109,7 +23167,7 @@
             "bearerAuth": []
           }
         ],
-        "summary": "Get a change's forge stack membership (repo_id addressing)",
+        "summary": "Get a change's stack membership (repo_id addressing)",
         "tags": [
           "trails"
         ]
@@ -41077,7 +41135,7 @@
             "bearerAuth": []
           }
         ],
-        "summary": "Get a trail's forge stack membership (repo_id addressing)",
+        "summary": "Get a trail's stack membership (repo_id addressing)",
         "tags": [
           "trails"
         ]
@@ -87216,11 +87274,11 @@
         "additionalProperties": false,
         "properties": {
           "base": {
-            "description": "The stack's target branch, which every stacked merge lands on. Empty when the forge did not report it.",
+            "description": "The bottom stack member's target branch. Empty when the target is unknown.",
             "type": "string"
           },
           "position": {
-            "description": "1-based index of this trail's proposal in pull_requests.",
+            "description": "1-based index of this trail in pull_requests.",
             "format": "int64",
             "type": "integer"
           },
@@ -87253,8 +87311,12 @@
             "type": "boolean"
           },
           "pr_number": {
+            "description": "Null for native trails.",
             "format": "int64",
-            "type": "integer"
+            "type": [
+              "integer",
+              "null"
+            ]
           },
           "status": {
             "type": [
@@ -87301,7 +87363,7 @@
           "stack": {
             "allOf": [
               {
-                "description": "Null when the trail has no change proposal, the repo is not a GitHub mirror, the proposal is in no stack, or the forge read failed."
+                "description": "Null when the trail is in no unambiguous stack or the stack lookup failed."
               },
               {
                 "$ref": "#/components/schemas/TrailStackJSON"
